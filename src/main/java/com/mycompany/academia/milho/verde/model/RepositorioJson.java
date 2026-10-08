@@ -90,8 +90,13 @@ public class RepositorioJson {
      * este método será substituído por {@code salvar(sistema)}, que
      * grava todos os cadastros juntos usando estes mesmos conversores.</p>
      *
+     * <p>Todos os clientes são convertidos antes da gravação. Se um
+     * deles estiver incompleto, nada é gravado e o arquivo anterior
+     * permanece como estava.</p>
+     *
      * @param clientes clientes a gravar
      * @throws IOException se não for possível gravar o arquivo
+     * @throws IllegalArgumentException se algum cliente estiver incompleto
      */
     public void salvarClientes(List<Cliente> clientes) throws IOException {
         JSONObject raiz = new JSONObject();
@@ -149,10 +154,18 @@ public class RepositorioJson {
      * <p>Grava apenas o CPF pseudonimizado; o número original
      * nunca chega ao arquivo.</p>
      *
+     * <p>Recusa clientes incompletos (sem ID ou com dado vazio,
+     * como os criados pelo construtor padrão e ainda não
+     * preenchidos). Se fossem gravados, o construtor com parâmetros
+     * os rejeitaria na leitura e o arquivo inteiro deixaria de abrir.</p>
+     *
      * @param cliente cliente a converter
      * @return objeto JSON com os dados do cliente
+     * @throws IllegalArgumentException se o cliente estiver incompleto
      */
     private JSONObject clienteParaJson(Cliente cliente) {
+        exigirClienteCompleto(cliente);
+
         JSONObject json = new JSONObject();
         json.put("id", cliente.getId());
         json.put("nome", cliente.getNome());
@@ -162,6 +175,25 @@ public class RepositorioJson {
         json.put("cpfPseudo", cliente.getCpfPseudo());
         json.put("ativo", cliente.isAtivo());
         return json;
+    }
+
+    /**
+     * Confere se o cliente tem ID e todos os dados preenchidos.
+     *
+     * @param cliente cliente a conferir
+     * @throws IllegalArgumentException se o cliente estiver incompleto
+     */
+    private void exigirClienteCompleto(Cliente cliente) {
+        boolean incompleto = cliente.getId() <= 0
+                || cliente.getNome().isBlank()
+                || cliente.getEndereco().isBlank()
+                || cliente.getTelefone().isBlank()
+                || cliente.getEmail().isBlank()
+                || cliente.getCpfPseudo().isBlank();
+        if (incompleto) {
+            throw new IllegalArgumentException(
+                    "Cliente incompleto não pode ser gravado: " + cliente);
+        }
     }
 
     /**

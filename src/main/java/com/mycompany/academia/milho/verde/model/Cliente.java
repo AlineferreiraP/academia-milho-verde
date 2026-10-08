@@ -4,7 +4,6 @@
  */
 package com.mycompany.academia.milho.verde.model;
 
-
 /**
  * Representa um cliente cadastrado na Academia Milho Verde.
  *
@@ -207,6 +206,43 @@ public class Cliente {
     }
 
     /**
+     * Atualiza os dados cadastrais do cliente.
+     *
+     * <p>Todos os dados são validados antes de qualquer alteração.
+     * Se um deles for inválido, nenhum atributo muda: o cadastro
+     * nunca fica pela metade.</p>
+     *
+     * <p>O identificador e a situação (ativo ou não) não são
+     * alterados por este método.</p>
+     *
+     * @param nome novo nome completo
+     * @param endereco novo endereço
+     * @param telefone novo telefone de contato
+     * @param email novo e-mail
+     * @param cpfPseudo CPF já pseudonimizado
+     * @throws IllegalArgumentException se algum dado estiver nulo,
+     *         vazio ou contiver apenas espaços
+     */
+    public void atualizarCadastro(String nome, String endereco,
+                                  String telefone, String email,
+                                  String cpfPseudo) {
+        // Primeiro valida tudo em variáveis locais; só depois altera
+        // os atributos. Assim, um erro no e-mail não deixa o nome
+        // já trocado.
+        String novoNome = exigirTexto(nome, "nome");
+        String novoEndereco = exigirTexto(endereco, "endereço");
+        String novoTelefone = exigirTexto(telefone, "telefone");
+        String novoEmail = exigirTexto(email, "e-mail");
+        String novoCpf = exigirTexto(cpfPseudo, "CPF pseudonimizado");
+
+        this.nome = novoNome;
+        this.endereco = novoEndereco;
+        this.telefone = novoTelefone;
+        this.email = novoEmail;
+        this.cpfPseudo = novoCpf;
+    }
+
+    /**
      * Desativa o cadastro do cliente.
      *
      * <p>É a remoção lógica usada quando o cliente já possui
@@ -259,5 +295,67 @@ public class Cliente {
                     "O campo " + campo + " do cliente deve ser preenchido.");
         }
         return valor;
+    }
+
+    /**
+     * Compara este cliente com outro objeto pelo identificador.
+     *
+     * <p>Dois objetos {@code Cliente} representam o mesmo cliente
+     * quando têm o mesmo ID, mesmo que outros dados tenham mudado.
+     * Um cliente ainda sem ID só é igual a ele mesmo.</p>
+     *
+     * @param outro objeto a comparar
+     * @return {@code true} se representarem o mesmo cliente
+     */
+    @Override
+    public boolean equals(Object outro) {
+        // Mesmo objeto na memória: certamente iguais.
+        if (this == outro) {
+            return true;
+        }
+        // instanceof também devolve false quando outro é null.
+        if (!(outro instanceof Cliente)) {
+            return false;
+        }
+        Cliente cliente = (Cliente) outro;
+
+        // Clientes em branco (sem ID) não são considerados iguais
+        // entre si, pois ainda não representam ninguém.
+        if (this.id == SEM_ID) {
+            return false;
+        }
+        return this.id == cliente.id;
+    }
+
+    /**
+     * Calcula o código de dispersão (hash) a partir do ID.
+     *
+     * <p>Deve ser coerente com {@link #equals(Object)}: clientes
+     * iguais têm o mesmo hash. Coleções como {@code HashSet} usam
+     * esse valor para localizar o objeto.</p>
+     *
+     * @return o código hash do cliente
+     */
+    @Override
+    public int hashCode() {
+        return Integer.hashCode(id);
+    }
+
+    /**
+     * Retorna uma descrição legível do cliente.
+     *
+     * <p>Não inclui o CPF, mesmo pseudonimizado, para que dados
+     * pessoais não apareçam em impressões e mensagens de erro.</p>
+     *
+     * @return texto com ID, nome, telefone, e-mail e situação
+     */
+    @Override
+    public String toString() {
+        return "Cliente[id=" + id
+                + ", nome=" + nome
+                + ", telefone=" + telefone
+                + ", email=" + email
+                + ", situação=" + (ativo ? "ativo" : "inativo")
+                + "]";
     }
 }
