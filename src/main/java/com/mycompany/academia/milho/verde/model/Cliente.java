@@ -105,21 +105,26 @@ public class Cliente {
      * <p>Os dados textuais são obrigatórios. A validação confere
      * apenas o preenchimento, não o formato do telefone ou do e-mail.</p>
      *
-     * @param id identificador positivo do cliente
-     * @param nome nome completo do cliente
-     * @param endereco endereço do cliente
-     * @param telefone telefone de contato
-     * @param email endereço de e-mail
-     * @param cpfPseudo CPF já pseudonimizado
+     * <p>Os parâmetros têm nomes diferentes dos atributos (prefixo
+     * {@code novo}) para evitar o sombreamento, prática não
+     * recomendada na Aula 7.</p>
+     *
+     * @param novoId identificador positivo do cliente
+     * @param novoNome nome completo do cliente
+     * @param novoEndereco endereço do cliente
+     * @param novoTelefone telefone de contato
+     * @param novoEmail endereço de e-mail
+     * @param novoCpfPseudo CPF já pseudonimizado
      * @throws IllegalArgumentException se o identificador não for
      *         positivo ou se algum dado textual estiver nulo, vazio
      *         ou contiver apenas espaços
      */
-    public Cliente(int id, String nome, String endereco,
-                   String telefone, String email, String cpfPseudo) {
+    public Cliente(int novoId, String novoNome, String novoEndereco,
+                   String novoTelefone, String novoEmail,
+                   String novoCpfPseudo) {
 
         // Um identificador válido precisa ser maior que zero.
-        if (id <= 0) {
+        if (novoId <= 0) {
             throw new IllegalArgumentException(
                     "O identificador do cliente deve ser positivo.");
         }
@@ -128,12 +133,12 @@ public class Cliente {
         // devolve o próprio valor quando ele é válido. Assim a regra
         // fica escrita em um só lugar e será reaproveitada em
         // atualizarCadastro(), sem duplicar código.
-        this.id = id;
-        this.nome = exigirTexto(nome, "nome");
-        this.endereco = exigirTexto(endereco, "endereço");
-        this.telefone = exigirTexto(telefone, "telefone");
-        this.email = exigirTexto(email, "e-mail");
-        this.cpfPseudo = exigirTexto(cpfPseudo, "CPF pseudonimizado");
+        this.id = novoId;
+        this.nome = exigirTexto(novoNome, "nome");
+        this.endereco = exigirTexto(novoEndereco, "endereço");
+        this.telefone = exigirTexto(novoTelefone, "telefone");
+        this.email = exigirTexto(novoEmail, "e-mail");
+        this.cpfPseudo = exigirTexto(novoCpfPseudo, "CPF pseudonimizado");
 
         // Todo cliente recém-criado começa com o cadastro ativo.
         this.ativo = true;
@@ -215,31 +220,31 @@ public class Cliente {
      * <p>O identificador e a situação (ativo ou não) não são
      * alterados por este método.</p>
      *
-     * @param nome novo nome completo
-     * @param endereco novo endereço
-     * @param telefone novo telefone de contato
-     * @param email novo e-mail
-     * @param cpfPseudo CPF já pseudonimizado
+     * @param novoNome novo nome completo
+     * @param novoEndereco novo endereço
+     * @param novoTelefone novo telefone de contato
+     * @param novoEmail novo e-mail
+     * @param novoCpfPseudo novo CPF já pseudonimizado
      * @throws IllegalArgumentException se algum dado estiver nulo,
      *         vazio ou contiver apenas espaços
      */
-    public void atualizarCadastro(String nome, String endereco,
-                                  String telefone, String email,
-                                  String cpfPseudo) {
+    public void atualizarCadastro(String novoNome, String novoEndereco,
+                                  String novoTelefone, String novoEmail,
+                                  String novoCpfPseudo) {
         // Primeiro valida tudo em variáveis locais; só depois altera
         // os atributos. Assim, um erro no e-mail não deixa o nome
         // já trocado.
-        String novoNome = exigirTexto(nome, "nome");
-        String novoEndereco = exigirTexto(endereco, "endereço");
-        String novoTelefone = exigirTexto(telefone, "telefone");
-        String novoEmail = exigirTexto(email, "e-mail");
-        String novoCpf = exigirTexto(cpfPseudo, "CPF pseudonimizado");
+        String nomeValido = exigirTexto(novoNome, "nome");
+        String enderecoValido = exigirTexto(novoEndereco, "endereço");
+        String telefoneValido = exigirTexto(novoTelefone, "telefone");
+        String emailValido = exigirTexto(novoEmail, "e-mail");
+        String cpfValido = exigirTexto(novoCpfPseudo, "CPF pseudonimizado");
 
-        this.nome = novoNome;
-        this.endereco = novoEndereco;
-        this.telefone = novoTelefone;
-        this.email = novoEmail;
-        this.cpfPseudo = novoCpf;
+        this.nome = nomeValido;
+        this.endereco = enderecoValido;
+        this.telefone = telefoneValido;
+        this.email = emailValido;
+        this.cpfPseudo = cpfValido;
     }
 
     /**
@@ -260,20 +265,20 @@ public class Cliente {
      * pacote {@code model}, como o Sistema, podem chamá-lo. Funciona
      * uma única vez, preservando a regra de que o ID não muda.</p>
      *
-     * @param id identificador positivo gerado pelo sistema
-     * @throws IllegalArgumentException se {@code id} não for positivo
+     * @param novoId identificador positivo gerado pelo sistema
+     * @throws IllegalArgumentException se {@code novoId} não for positivo
      * @throws IllegalStateException se o cliente já tiver identificador
      */
-    void definirId(int id) {
+    void definirId(int novoId) {
         if (this.id != SEM_ID) {
             throw new IllegalStateException(
                     "O identificador do cliente já foi definido.");
         }
-        if (id <= 0) {
+        if (novoId <= 0) {
             throw new IllegalArgumentException(
                     "O identificador do cliente deve ser positivo.");
         }
-        this.id = id;
+        this.id = novoId;
     }
 
     /**
