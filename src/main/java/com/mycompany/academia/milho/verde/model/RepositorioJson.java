@@ -63,15 +63,15 @@ public class RepositorioJson {
     /**
      * Construtor com parâmetros: usa o arquivo informado.
      *
-     * @param arquivo caminho do arquivo JSON
-     * @throws IllegalArgumentException se {@code arquivo} for nulo
+     * @param caminhoArquivo caminho do arquivo JSON
+     * @throws IllegalArgumentException se {@code caminhoArquivo} for nulo
      */
-    public RepositorioJson(Path arquivo) {
-        if (arquivo == null) {
+    public RepositorioJson(Path caminhoArquivo) {
+        if (caminhoArquivo == null) {
             throw new IllegalArgumentException(
                     "O caminho do arquivo JSON deve ser informado.");
         }
-        this.arquivo = arquivo;
+        this.arquivo = caminhoArquivo;
     }
 
     /**
