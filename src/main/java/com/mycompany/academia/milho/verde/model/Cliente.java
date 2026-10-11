@@ -68,9 +68,9 @@ public class Cliente {
     /**
      * Indica se o cadastro está ativo.
      *
-     * <p>Todo cliente começa ativo. Um cliente com histórico
-     * (reservas, compras ou acessos) é desativado em vez de
-     * apagado, preservando relatórios e extratos.</p>
+     * <p>Todo cliente começa ativo. A remoção não apaga o objeto:
+     * {@code GestaoClientes.removerCliente} chama {@link #desativar()},
+     * preservando agendamentos, extratos e registros da catraca.</p>
      */
     private boolean ativo;
 

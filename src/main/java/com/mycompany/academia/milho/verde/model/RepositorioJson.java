@@ -116,7 +116,7 @@ public class RepositorioJson {
      * Lê a lista de clientes do arquivo JSON.
      *
      * <p><b>Etapa provisória:</b> será substituído por
-     * {@code carregarEm(sistema)} quando a classe Sistema existir.</p>
+     * {@code carregar(sistema)} quando a classe Sistema existir.</p>
      *
      * @return os clientes gravados; lista vazia se o arquivo não existir
      * @throws IOException se não for possível ler o arquivo
