@@ -7,41 +7,14 @@ package com.mycompany.academia.milho.verde.model;
 /**
  * Representa um cliente cadastrado na Academia Milho Verde.
  *
- * <p>Esta classe pertence à camada Model da organização MVC
- * e armazena os dados cadastrais do cliente. O cliente não
- * possui login no sistema: ele é cadastrado e atendido pelos
- * funcionários.</p>
- *
- * <p>A classe oferece dois construtores: o construtor com
- * parâmetros, que cria o cliente completo, e o construtor padrão,
- * que cria um cadastro em branco a ser preenchido depois.</p>
- *
- * <p>O identificador é definido uma única vez e não pode ser
- * alterado depois. O CPF é recebido já pseudonimizado, de modo
- * que o número original nunca é armazenado aqui.</p>
+ * <p>Herda de {@link Pessoa} o identificador, o nome, o e-mail e a
+ * situação do cadastro, e acrescenta endereço, telefone e CPF
+ * pseudonimizado. O cliente não usa o sistema: é cadastrado e
+ * atendido pelos funcionários.</p>
  *
  * @author Aline Ferreira Pena
  */
-public class Cliente {
-
-    /**
-     * Valor do identificador enquanto o cliente ainda não recebeu
-     * um ID do sistema.
-     */
-    private static final int SEM_ID = 0;
-
-    /**
-     * Identificador único do cliente, gerado pelo sistema.
-     *
-     * <p>Não é {@code final} porque o construtor padrão cria o
-     * cliente sem ID. Mesmo assim, o valor só pode ser definido
-     * uma vez: pelo construtor com parâmetros ou por
-     * {@link #definirId(int)}.</p>
-     */
-    private int id;
-
-    /** Nome completo do cliente. */
-    private String nome;
+public class Cliente extends Pessoa {
 
     /** Endereço informado no cadastro. */
     private String endereco;
@@ -54,9 +27,6 @@ public class Cliente {
      */
     private String telefone;
 
-    /** Endereço de e-mail do cliente. */
-    private String email;
-
     /**
      * CPF pseudonimizado do cliente.
      *
@@ -66,48 +36,26 @@ public class Cliente {
     private String cpfPseudo;
 
     /**
-     * Indica se o cadastro está ativo.
-     *
-     * <p>Todo cliente começa ativo. A remoção não apaga o objeto:
-     * {@code GestaoClientes.removerCliente} chama {@link #desativar()},
-     * preservando agendamentos, extratos e registros da catraca.</p>
-     */
-    private boolean ativo;
-
-    /**
      * Construtor padrão: cria um cliente em branco.
      *
-     * <p>O cliente nasce ativo, sem identificador e com os dados
-     * textuais vazios. Antes de ser cadastrado no sistema, ele
-     * precisa receber um ID por {@link #definirId(int)} e ter os
-     * dados preenchidos por {@code atualizarCadastro}.</p>
+     * <p>{@code super()} cria a parte comum em branco; endereço,
+     * telefone e CPF começam vazios.</p>
      */
     public Cliente() {
+        super();
         // Strings vazias em vez de null evitam NullPointerException
         // em toString() e em comparações feitas antes do preenchimento.
-        this.id = SEM_ID;
-        this.nome = "";
         this.endereco = "";
         this.telefone = "";
-        this.email = "";
         this.cpfPseudo = "";
-        this.ativo = true;
     }
 
     /**
-     * Construtor com parâmetros: cria um cliente ativo com seus
-     * dados cadastrais.
+     * Construtor com parâmetros: cria um cliente ativo.
      *
-     * <p>O identificador deve vir do gerador de IDs do sistema.
-     * Este construtor só confere se ele é positivo; a garantia de
-     * que é único fica com o gerador.</p>
-     *
-     * <p>Os dados textuais são obrigatórios. A validação confere
-     * apenas o preenchimento, não o formato do telefone ou do e-mail.</p>
-     *
-     * <p>Os parâmetros têm nomes diferentes dos atributos (prefixo
-     * {@code novo}) para evitar o sombreamento, prática não
-     * recomendada na Aula 7.</p>
+     * <p>{@code super(...)} vem na primeira linha e valida o ID, o
+     * nome e o e-mail; depois são validados os dados próprios do
+     * cliente.</p>
      *
      * @param novoId identificador positivo do cliente
      * @param novoNome nome completo do cliente
@@ -116,56 +64,26 @@ public class Cliente {
      * @param novoEmail endereço de e-mail
      * @param novoCpfPseudo CPF já pseudonimizado
      * @throws IllegalArgumentException se o identificador não for
-     *         positivo ou se algum dado textual estiver nulo, vazio
-     *         ou contiver apenas espaços
+     *         positivo ou se algum dado estiver nulo, vazio ou
+     *         contiver apenas espaços
      */
     public Cliente(int novoId, String novoNome, String novoEndereco,
                    String novoTelefone, String novoEmail,
                    String novoCpfPseudo) {
+        // super(...) precisa ser a primeira linha: a Pessoa valida e
+        // guarda o ID, o nome e o e-mail antes dos dados do cliente.
+        super(novoId, novoNome, novoEmail);
 
-        // Um identificador válido precisa ser maior que zero.
-        if (novoId <= 0) {
-            throw new IllegalArgumentException(
-                    "O identificador do cliente deve ser positivo.");
-        }
-
-        // Cada campo é conferido pelo mesmo método auxiliar, que
-        // devolve o próprio valor quando ele é válido. Assim a regra
-        // fica escrita em um só lugar e será reaproveitada em
-        // atualizarCadastro(), sem duplicar código.
-        this.id = novoId;
-        this.nome = exigirTexto(novoNome, "nome");
+        // Os dados próprios usam a mesma regra herdada de Pessoa.
         this.endereco = exigirTexto(novoEndereco, "endereço");
         this.telefone = exigirTexto(novoTelefone, "telefone");
-        this.email = exigirTexto(novoEmail, "e-mail");
         this.cpfPseudo = exigirTexto(novoCpfPseudo, "CPF pseudonimizado");
-
-        // Todo cliente recém-criado começa com o cadastro ativo.
-        this.ativo = true;
-    }
-
-    /**
-     * Retorna o identificador do cliente.
-     *
-     * @return o ID do cliente, ou 0 se ainda não foi definido
-     */
-    public int getId() {
-        return id;
-    }
-
-    /**
-     * Retorna o nome completo do cliente.
-     *
-     * @return o nome do cliente
-     */
-    public String getNome() {
-        return nome;
     }
 
     /**
      * Retorna o endereço do cliente.
      *
-     * @return o endereço do cliente
+     * @return o endereço
      */
     public String getEndereco() {
         return endereco;
@@ -174,19 +92,10 @@ public class Cliente {
     /**
      * Retorna o telefone de contato do cliente.
      *
-     * @return o telefone do cliente
+     * @return o telefone
      */
     public String getTelefone() {
         return telefone;
-    }
-
-    /**
-     * Retorna o e-mail do cliente.
-     *
-     * @return o e-mail do cliente
-     */
-    public String getEmail() {
-        return email;
     }
 
     /**
@@ -199,26 +108,10 @@ public class Cliente {
     }
 
     /**
-     * Informa se o cadastro do cliente está ativo.
-     *
-     * <p>Para atributos {@code boolean}, a convenção Java usa o
-     * prefixo {@code is} no lugar de {@code get}.</p>
-     *
-     * @return {@code true} se o cadastro estiver ativo
-     */
-    public boolean isAtivo() {
-        return ativo;
-    }
-
-    /**
      * Atualiza os dados cadastrais do cliente.
      *
      * <p>Todos os dados são validados antes de qualquer alteração.
-     * Se um deles for inválido, nenhum atributo muda: o cadastro
-     * nunca fica pela metade.</p>
-     *
-     * <p>O identificador e a situação (ativo ou não) não são
-     * alterados por este método.</p>
+     * Se um deles for inválido, nada muda.</p>
      *
      * @param novoNome novo nome completo
      * @param novoEndereco novo endereço
@@ -231,85 +124,22 @@ public class Cliente {
     public void atualizarCadastro(String novoNome, String novoEndereco,
                                   String novoTelefone, String novoEmail,
                                   String novoCpfPseudo) {
-        // Primeiro valida tudo em variáveis locais; só depois altera
-        // os atributos. Assim, um erro no e-mail não deixa o nome
-        // já trocado.
-        String nomeValido = exigirTexto(novoNome, "nome");
+        // Valida primeiro os dados do cliente; nome e e-mail são
+        // validados por alterarNomeEmail antes de mudar qualquer coisa.
         String enderecoValido = exigirTexto(novoEndereco, "endereço");
         String telefoneValido = exigirTexto(novoTelefone, "telefone");
-        String emailValido = exigirTexto(novoEmail, "e-mail");
         String cpfValido = exigirTexto(novoCpfPseudo, "CPF pseudonimizado");
 
-        this.nome = nomeValido;
+        alterarNomeEmail(novoNome, novoEmail);
         this.endereco = enderecoValido;
         this.telefone = telefoneValido;
-        this.email = emailValido;
         this.cpfPseudo = cpfValido;
-    }
-
-    /**
-     * Desativa o cadastro do cliente.
-     *
-     * <p>É a remoção lógica: {@code GestaoClientes.removerCliente}
-     * chama este método em vez de apagar o objeto. O cliente continua
-     * existindo para agendamentos, extratos e registros da catraca,
-     * mas deixa de aparecer como cliente ativo.</p>
-     */
-    public void desativar() {
-        this.ativo = false;
-    }
-
-    /**
-     * Define o identificador de um cliente criado pelo construtor padrão.
-     *
-     * <p>Tem acesso de pacote (sem modificador): só as classes do
-     * pacote {@code model}, como a GestaoClientes, que gera os IDs,
-     * podem chamá-lo. Funciona uma única vez, preservando a regra de
-     * que o ID não muda.</p>
-     *
-     * @param novoId identificador positivo gerado pelo sistema
-     * @throws IllegalArgumentException se {@code novoId} não for positivo
-     * @throws IllegalStateException se o cliente já tiver identificador
-     */
-    void definirId(int novoId) {
-        if (this.id != SEM_ID) {
-            throw new IllegalStateException(
-                    "O identificador do cliente já foi definido.");
-        }
-        if (novoId <= 0) {
-            throw new IllegalArgumentException(
-                    "O identificador do cliente deve ser positivo.");
-        }
-        this.id = novoId;
-    }
-
-    /**
-     * Confere se um dado textual obrigatório foi preenchido.
-     *
-     * <p>É {@code static} porque não depende de nenhum cliente
-     * específico: só analisa o texto recebido.</p>
-     *
-     * @param valor texto a conferir
-     * @param campo nome do campo, usado na mensagem de erro
-     * @return o próprio {@code valor}, quando válido
-     * @throws IllegalArgumentException se {@code valor} for nulo,
-     *         vazio ou contiver apenas espaços
-     */
-    private static String exigirTexto(String valor, String campo) {
-        // isBlank() é verdadeiro para texto vazio ou só com espaços.
-        if (valor == null || valor.isBlank()) {
-            throw new IllegalArgumentException(
-                    "O campo " + campo + " do cliente deve ser preenchido.");
-        }
-        return valor;
     }
 
     /**
      * Compara este cliente com outro objeto pelo identificador.
      *
-     * <p>Dois objetos {@code Cliente} representam o mesmo cliente
-     * quando têm o mesmo ID, mesmo que outros dados tenham mudado.
-     * Um cliente ainda sem ID só é igual a ele mesmo.</p>
+     * <p>Um cliente ainda sem ID só é igual a ele mesmo.</p>
      *
      * @param outro objeto a comparar
      * @return {@code true} se representarem o mesmo cliente
@@ -328,41 +158,33 @@ public class Cliente {
 
         // Clientes em branco (sem ID) não são considerados iguais
         // entre si, pois ainda não representam ninguém.
-        if (this.id == SEM_ID) {
+        if (getId() == SEM_ID) {
             return false;
         }
-        return this.id == cliente.id;
+        return getId() == cliente.getId();
     }
 
     /**
-     * Calcula o código de dispersão (hash) a partir do ID.
-     *
-     * <p>Deve ser coerente com {@link #equals(Object)}: clientes
-     * iguais têm o mesmo hash. Coleções como {@code HashSet} usam
-     * esse valor para localizar o objeto.</p>
+     * Calcula o código hash a partir do ID, coerente com
+     * {@link #equals(Object)}.
      *
      * @return o código hash do cliente
      */
     @Override
     public int hashCode() {
-        return Integer.hashCode(id);
+        return Integer.hashCode(getId());
     }
 
     /**
-     * Retorna uma descrição legível do cliente.
-     *
-     * <p>Não inclui o CPF, mesmo pseudonimizado, para que dados
-     * pessoais não apareçam em impressões e mensagens de erro.</p>
+     * Retorna uma descrição legível do cliente, sem o CPF.
      *
      * @return texto com ID, nome, telefone, e-mail e situação
      */
     @Override
     public String toString() {
-        return "Cliente[id=" + id
-                + ", nome=" + nome
-                + ", telefone=" + telefone
-                + ", email=" + email
-                + ", situação=" + (ativo ? "ativo" : "inativo")
-                + "]";
+        // super.toString() traz os dados comuns da Pessoa; o CPF fica
+        // de fora para não expor dado pessoal.
+        return "Cliente[" + super.toString()
+                + ", telefone=" + telefone + "]";
     }
 }
