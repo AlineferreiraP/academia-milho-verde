@@ -22,9 +22,10 @@ public class AcademiaMilhoVerde {
     /**
      * Ponto de entrada do programa.
      *
-     * @param args argumentos da linha de comando (não utilizados)
+     * @param args argumentos da linha de comando não utilizados
      */
     public static void main(String[] args) {
+        
         RepositorioJson repositorio = new RepositorioJson();
 
         // Construtor com parâmetros.
@@ -53,12 +54,11 @@ public class AcademiaMilhoVerde {
             System.out.println("Erro ao acessar o arquivo: "
                     + erro.getMessage());
         }
-
         // Validação: deve cair no catch.
         try {
             new Cliente(3, "Maria", "   ", "123", "m@email.com", "x");
-        } catch (IllegalArgumentException erro) {
+         } catch (IllegalArgumentException erro) {
             System.out.println("Validação OK: " + erro.getMessage());
-        }
-    }
+ }
+}
 }

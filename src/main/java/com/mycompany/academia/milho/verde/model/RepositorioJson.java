@@ -40,16 +40,22 @@ import org.json.JSONObject;
  * <p>As demais listas (funcionários, produtos, agendamentos...)
  * serão acrescentadas ao mesmo arquivo nas próximas etapas.</p>
  *
+ * <p><b>Por que org.json e não Gson:</b> a org.json converte campo
+ * por campo, do jeito que escrevemos nos conversores. Assim, só vai
+ * para o arquivo o que decidimos gravar (o CPF original nunca é
+ * gravado) e, na leitura, cada objeto é criado pelo construtor com
+ * parâmetros, que valida os dados. A Gson converte automaticamente,
+ * mas cria os objetos sem chamar o construtor e precisaria de
+ * configuração extra para datas ({@code LocalDate}) e para objetos
+ * que apontam um para o outro, como {@code Cliente} e {@code Extrato}.</p>
+ *
  * @author Aline Ferreira Pena
  */
 public class RepositorioJson {
-
     /** Nome da lista de clientes dentro do arquivo JSON. */
     private static final String CHAVE_CLIENTES = "clientes";
-
     /** Caminho do arquivo JSON onde os dados são gravados. */
     private final Path arquivo;
-
     /**
      * Construtor padrão: usa o arquivo {@code academia.json} na pasta
      * em que o programa é executado.
@@ -59,7 +65,6 @@ public class RepositorioJson {
         // evitando repetir a inicialização.
         this(Path.of("academia.json"));
     }
-
     /**
      * Construtor com parâmetros: usa o arquivo informado.
      *
@@ -195,7 +200,6 @@ public class RepositorioJson {
                     "Cliente incompleto não pode ser gravado: " + cliente);
         }
     }
-
     /**
      * Converte um array JSON em lista de clientes.
      *
@@ -210,7 +214,6 @@ public class RepositorioJson {
         }
         return clientes;
     }
-
     /**
      * Reconstrói um cliente a partir de um objeto JSON.
      *
@@ -237,7 +240,6 @@ public class RepositorioJson {
         }
         return cliente;
     }
-
     /**
      * Grava o texto no arquivo de forma segura.
      *

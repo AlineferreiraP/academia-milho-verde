@@ -250,9 +250,10 @@ public class Cliente {
     /**
      * Desativa o cadastro do cliente.
      *
-     * <p>É a remoção lógica usada quando o cliente já possui
-     * histórico: o objeto continua existindo para relatórios e
-     * extratos, mas deixa de aparecer como cliente ativo.</p>
+     * <p>É a remoção lógica: {@code GestaoClientes.removerCliente}
+     * chama este método em vez de apagar o objeto. O cliente continua
+     * existindo para agendamentos, extratos e registros da catraca,
+     * mas deixa de aparecer como cliente ativo.</p>
      */
     public void desativar() {
         this.ativo = false;
@@ -262,8 +263,9 @@ public class Cliente {
      * Define o identificador de um cliente criado pelo construtor padrão.
      *
      * <p>Tem acesso de pacote (sem modificador): só as classes do
-     * pacote {@code model}, como o Sistema, podem chamá-lo. Funciona
-     * uma única vez, preservando a regra de que o ID não muda.</p>
+     * pacote {@code model}, como a GestaoClientes, que gera os IDs,
+     * podem chamá-lo. Funciona uma única vez, preservando a regra de
+     * que o ID não muda.</p>
      *
      * @param novoId identificador positivo gerado pelo sistema
      * @throws IllegalArgumentException se {@code novoId} não for positivo
