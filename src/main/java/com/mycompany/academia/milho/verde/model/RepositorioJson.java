@@ -52,10 +52,13 @@ import org.json.JSONObject;
  * @author Aline Ferreira Pena
  */
 public class RepositorioJson {
+
     /** Nome da lista de clientes dentro do arquivo JSON. */
     private static final String CHAVE_CLIENTES = "clientes";
+
     /** Caminho do arquivo JSON onde os dados são gravados. */
     private final Path arquivo;
+
     /**
      * Construtor padrão: usa o arquivo {@code academia.json} na pasta
      * em que o programa é executado.
@@ -65,6 +68,7 @@ public class RepositorioJson {
         // evitando repetir a inicialização.
         this(Path.of("academia.json"));
     }
+
     /**
      * Construtor com parâmetros: usa o arquivo informado.
      *
@@ -200,6 +204,7 @@ public class RepositorioJson {
                     "Cliente incompleto não pode ser gravado: " + cliente);
         }
     }
+
     /**
      * Converte um array JSON em lista de clientes.
      *
@@ -214,6 +219,7 @@ public class RepositorioJson {
         }
         return clientes;
     }
+
     /**
      * Reconstrói um cliente a partir de um objeto JSON.
      *
@@ -240,6 +246,7 @@ public class RepositorioJson {
         }
         return cliente;
     }
+
     /**
      * Grava o texto no arquivo de forma segura.
      *

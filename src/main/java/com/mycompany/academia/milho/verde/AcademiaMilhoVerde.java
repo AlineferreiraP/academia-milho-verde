@@ -77,5 +77,13 @@ public class AcademiaMilhoVerde {
         System.out.println("Mesmo hash: "
                 + (ana.hashCode() == mesmaAna.hashCode()));
         System.out.println("IDs diferentes: " + ana.equals(joao));
+
+        // Dado inválido: nada muda, nem o nome.
+        try {
+            ana.atualizarCadastro("Nome Novo", "Rua X", "111", "   ", "a1");
+        } catch (IllegalArgumentException erro) {
+            System.out.println("Nada mudou: " + ana.getNome()
+                    + " (" + erro.getMessage() + ")");
+        }
     }
 }
