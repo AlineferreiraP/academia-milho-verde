@@ -20,9 +20,9 @@ Este repositório é a implementação desse sistema em Java, desenvolvida como 
 
 | Área | O que o sistema faz |
 |---|---|
-| 👤 **Clientes** | Cadastro, edição e remoção com ID único e CPF pseudonimizado |
-| 🧑‍💼 **Funcionários** | Colaboradores e administradores com login e senha protegida por hash |
-| 📅 **Agenda** | Aulas nas 4 salas, reserva preliminar, confirmação até 5 dias úteis antes e cancelamento com estorno de 50% |
+| 👤 **Clientes** | Cadastro, edição e remoção (exclusão lógica) com ID único e CPF pseudonimizado |
+| 🧑‍💼 **Funcionários** | Colaboradores e administradores com login; só o administrador acessa o financeiro |
+| 📅 **Agenda** | Agenda semanal de cada sala em matriz (segunda a sábado, das 5h às 23h), reserva preliminar, confirmação até 5 dias úteis antes e cancelamento com estorno de 50% |
 | 🛒 **Lojinha e lanchonete** | Produtos, estoque, reposição, vendas e extrato para o cliente |
 | 🚪 **Catraca** | Recebe entradas e saídas automaticamente e gera relatórios diários, mensais e anuais |
 | 💰 **Financeiro** | Despesas, relatório de vendas e balanço mensal com estatísticas (restrito ao administrador) |
@@ -32,18 +32,40 @@ Este repositório é a implementação desse sistema em Java, desenvolvida como 
 
 ## 🧱 Arquitetura
 
-O projeto segue o padrão **MVC (Model–View–Controller)**. Uma solicitação percorre o caminho View → Controller → Sistema (fachada do Model) → classes de domínio, e os dados são gravados no arquivo `academia.json`.
+O projeto segue o padrão **MVC (Model–View–Controller)**:
 
-- **Model**: dados e regras de negócio (prazos, estornos, estoque, permissões, cálculos). Não sabe nada sobre telas.
+- **Model**: dados e regras de negócio (prazos, estornos, estoque, permissões, cálculos). Não sabe nada sobre telas: quando algo dá errado, lança uma exceção.
 - **View**: lê o que o usuário digita e mostra os resultados.
 - **Controller**: faz a ponte entre a View e o Model.
+
+Dentro do Model, a classe `Sistema` cuida do login, das permissões, das 4 salas e da catraca, e coordena **cinco classes de gestão**, cada uma responsável por um assunto:
+
+| Classe | Assunto |
+|---|---|
+| `GestaoClientes` | Cadastro de clientes e conta do cliente |
+| `GestaoFuncionarios` | Colaboradores e administradores |
+| `GestaoAgendamentos` | Aulas, agenda semanal e agendamentos |
+| `GestaoVendas` | Lojinha, lanchonete, estoque, vendas e relatórios de vendas |
+| `GestaoFinanceiro` | Despesas e balanço mensal |
+
+As pessoas do sistema seguem uma hierarquia de herança:
+
+```
+Pessoa «abstrata»            (id, nome, e-mail, situação)
+├── Cliente                  (endereço, telefone, CPF pseudonimizado)
+└── Funcionario «abstrata»   (senha)
+    ├── Colaborador          (não acessa o financeiro)
+    └── Administrador        (acessa o financeiro)
+```
+
+Estrutura de pastas:
 
 ```
 src/main/java/com/mycompany/academia/milho/verde/
 ├── AcademiaMilhoVerde.java   → classe principal
 ├── model/                    → regras de negócio e persistência
-├── controller/               → um controller por área do sistema
-└── view/                     → interface com o usuário
+├── controller/               → AcademiaController
+└── view/                     → ConsoleView
 ```
 
 ---
@@ -55,7 +77,7 @@ src/main/java/com/mycompany/academia/milho/verde/
 - **[org.json](https://github.com/stleary/JSON-java)** (versão 20260522) para ler e gravar JSON
 - **Apache NetBeans** como IDE
 - **JavaDoc** para a documentação do código
-- **LaTeX** para a documentação de modelagem (casos de uso, cenários e diagrama de classes)
+- **LaTeX** para a documentação de modelagem (casos de uso, cenários, diagramas de sequência e de classes)
 
 ---
 
@@ -76,29 +98,31 @@ Os dados são gravados no arquivo `academia.json`, criado na pasta do projeto na
 
 ### Gerar a documentação
 
+No NetBeans: botão direito no projeto → **Generate Javadoc**. Pelo terminal:
+
 ```bash
 mvn javadoc:javadoc
 ```
 
-O resultado fica em `target/site/apidocs/index.html`.
+O resultado fica em `target/reports/apidocs/index.html`.
 
 ---
 
 ## 🚧 Andamento
 
-O desenvolvimento está sendo feito classe por classe, com um commit para cada etapa.
+O desenvolvimento está sendo feito classe por classe, com um commit para cada etapa, e o diagrama de classes é atualizado junto com o código.
 
 - [x] Estrutura do projeto Maven e dependência JSON
-- [x] `Cliente`: atributos, construtores e getters
-- [x] `RepositorioJson`: gravação e leitura de clientes
-- [ ] Enumerações
-- [ ] Funcionários, autenticação e sessão
-- [ ] Lojinha e lanchonete
-- [ ] Agenda, reservas e pagamentos
-- [ ] Catraca e relatórios de acesso
-- [ ] Despesas, relatório de vendas e balanço mensal
-- [ ] Fachada `Sistema` e persistência completa
-- [ ] Controllers e interface de console
+- [x] `Pessoa` (abstrata) e `Cliente`
+- [x] `Funcionario` (abstrata), `Colaborador` e `Administrador`
+- [x] `RepositorioJson`: gravação e leitura de clientes e funcionários
+- [x] Testes no `main` de todas as funções criadas até aqui
+- [ ] Lojinha e lanchonete: `Produto`, `Estoque`, `ItemVenda`, `Venda` e `Extrato`
+- [ ] Agenda: `Sala`, `Aula`, `AgendaSemanal`, `Agendamento` e comparadores
+- [ ] Catraca: `RegistroCatraca` e `Catraca`
+- [ ] Financeiro: `Despesa`, `RelatorioVendas` e `BalancoMensal`
+- [ ] Classes de gestão, `Sistema` e persistência completa
+- [ ] `AcademiaController` e `ConsoleView`
 - [ ] JavaDoc completo
 
 ---
@@ -106,8 +130,9 @@ O desenvolvimento está sendo feito classe por classe, com um commit para cada e
 ## 🔒 Cuidados com os dados
 
 - O **CPF** é pseudonimizado antes de ser armazenado; o número original nunca é salvo.
-- **Senhas** são guardadas apenas como hash.
-- O **número do cartão** não é gravado: o sistema guarda somente a referência devolvida pelo serviço de pagamento.
+- A **senha** não tem getter público e nunca aparece em impressões nem em mensagens de erro; o login só confere se a senha informada está certa. No arquivo ela é gravada como texto, porque criptografia está fora do escopo da disciplina.
+- O **cartão de crédito** tem o débito simulado e aparece sempre mascarado (só os 4 últimos dígitos).
+- Remover um cliente ou funcionário **desativa** o cadastro em vez de apagá-lo, para não perder o histórico.
 
 ---
 
