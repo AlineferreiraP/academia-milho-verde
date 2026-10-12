@@ -111,7 +111,19 @@ public abstract class Funcionario extends Pessoa {
         }
         return false;
     }
-
+        /**
+     * Retorna a senha para ser gravada no arquivo JSON.
+     *
+     * <p>Tem acesso de pacote (sem modificador): só as classes do
+     * pacote {@code model}, como o {@link RepositorioJson}, podem
+     * chamá-lo. Para as demais classes a senha continua inacessível;
+     * elas só usam {@link #verificarSenha(String)}.</p>
+     *
+     * @return a senha guardada
+     */
+    String getSenha() {
+        return senha;
+    }
     /**
      * Informa se o funcionário pode usar as despesas e o balanço mensal.
      *

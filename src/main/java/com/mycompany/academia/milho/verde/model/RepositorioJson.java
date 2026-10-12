@@ -26,19 +26,24 @@ import org.json.JSONObject;
  * converter os objetos Java em texto JSON e vice-versa.</p>
  *
  * <p>O arquivo tem um objeto principal com uma lista para cada
- * tipo de cadastro. Nesta etapa, só a lista de clientes existe:</p>
+ * tipo de cadastro. Nesta etapa, existem as listas de clientes e de
+ * funcionários:</p>
  *
  * <pre>
  * {
  *   "clientes": [
  *     { "id": 1, "nome": "Ana", "endereco": "...", "telefone": "...",
  *       "email": "...", "cpfPseudo": "...", "ativo": true }
+ *   ],
+ *   "funcionarios": [
+ *     { "id": 1, "perfil": "COLABORADOR", "nome": "Bia",
+ *       "email": "...", "senha": "...", "ativo": true }
  *   ]
  * }
  * </pre>
  *
- * <p>As demais listas (funcionários, produtos, agendamentos...)
- * serão acrescentadas ao mesmo arquivo nas próximas etapas.</p>
+ * <p>As demais listas (produtos, agendamentos...) serão acrescentadas
+ * ao mesmo arquivo nas próximas etapas.</p>
  *
  * <p><b>Por que org.json e não Gson:</b> a org.json converte campo
  * por campo, do jeito que escrevemos nos conversores. Assim, só vai
@@ -55,6 +60,15 @@ public class RepositorioJson {
 
     /** Nome da lista de clientes dentro do arquivo JSON. */
     private static final String CHAVE_CLIENTES = "clientes";
+
+    /** Nome da lista de funcionários dentro do arquivo JSON. */
+    private static final String CHAVE_FUNCIONARIOS = "funcionarios";
+
+    /** Valor do campo "perfil" para administradores. */
+    private static final String PERFIL_ADMINISTRADOR = "ADMINISTRADOR";
+
+    /** Valor do campo "perfil" para colaboradores. */
+    private static final String PERFIL_COLABORADOR = "COLABORADOR";
 
     /** Caminho do arquivo JSON onde os dados são gravados. */
     private final Path arquivo;
@@ -93,23 +107,26 @@ public class RepositorioJson {
     }
 
     /**
-     * Grava a lista de clientes no arquivo JSON.
+     * Grava os clientes e os funcionários no arquivo JSON.
      *
      * <p><b>Etapa provisória:</b> quando a classe Sistema existir,
      * este método será substituído por {@code salvar(sistema)}, que
      * grava todos os cadastros juntos usando estes mesmos conversores.</p>
      *
-     * <p>Todos os clientes são convertidos antes da gravação. Se um
+     * <p>Todos os objetos são convertidos antes da gravação. Se um
      * deles estiver incompleto, nada é gravado e o arquivo anterior
      * permanece como estava.</p>
      *
      * @param clientes clientes a gravar
+     * @param funcionarios funcionários a gravar
      * @throws IOException se não for possível gravar o arquivo
-     * @throws IllegalArgumentException se algum cliente estiver incompleto
+     * @throws IllegalArgumentException se algum cadastro estiver incompleto
      */
-    public void salvarClientes(List<Cliente> clientes) throws IOException {
+    public void salvarDados(List<Cliente> clientes,
+                            List<Funcionario> funcionarios) throws IOException {
         JSONObject raiz = new JSONObject();
         raiz.put(CHAVE_CLIENTES, clientesParaJson(clientes));
+        raiz.put(CHAVE_FUNCIONARIOS, funcionariosParaJson(funcionarios));
 
         // toString(2) gera o texto com indentação de 2 espaços,
         // deixando o arquivo legível para conferência.
@@ -122,25 +139,40 @@ public class RepositorioJson {
      * <p><b>Etapa provisória:</b> será substituído por
      * {@code carregar(sistema)} quando a classe Sistema existir.</p>
      *
-     * @return os clientes gravados; lista vazia se o arquivo não existir
+     * @return os clientes gravados; lista vazia se o arquivo ou a
+     *         lista não existirem
      * @throws IOException se não for possível ler o arquivo
      * @throws JSONException se o conteúdo não for um JSON válido ou
      *         faltar algum campo obrigatório
      */
     public List<Cliente> carregarClientes() throws IOException {
-        // No primeiro uso o arquivo ainda não existe: não há o que carregar.
-        if (Files.notExists(arquivo)) {
-            return new ArrayList<>();
+        JSONArray lista = lerLista(CHAVE_CLIENTES);
+        List<Cliente> clientes = new ArrayList<>();
+        for (int i = 0; i < lista.length(); i++) {
+            clientes.add(jsonParaCliente(lista.getJSONObject(i)));
         }
-        JSONObject raiz = new JSONObject(lerTexto());
+        return clientes;
+    }
 
-        // optJSONArray devolve null em vez de lançar erro quando a
-        // lista não existe no arquivo.
-        JSONArray lista = raiz.optJSONArray(CHAVE_CLIENTES);
-        if (lista == null) {
-            return new ArrayList<>();
+    /**
+     * Lê a lista de funcionários do arquivo JSON.
+     *
+     * <p><b>Etapa provisória:</b> será substituído por
+     * {@code carregar(sistema)} quando a classe Sistema existir.</p>
+     *
+     * @return os funcionários gravados; lista vazia se o arquivo ou a
+     *         lista não existirem
+     * @throws IOException se não for possível ler o arquivo
+     * @throws JSONException se o conteúdo não for um JSON válido ou
+     *         faltar algum campo obrigatório
+     */
+    public List<Funcionario> carregarFuncionarios() throws IOException {
+        JSONArray lista = lerLista(CHAVE_FUNCIONARIOS);
+        List<Funcionario> funcionarios = new ArrayList<>();
+        for (int i = 0; i < lista.length(); i++) {
+            funcionarios.add(jsonParaFuncionario(lista.getJSONObject(i)));
         }
-        return jsonParaClientes(lista);
+        return funcionarios;
     }
 
     /**
@@ -161,19 +193,22 @@ public class RepositorioJson {
      * Converte um cliente em objeto JSON.
      *
      * <p>Grava apenas o CPF pseudonimizado; o número original
-     * nunca chega ao arquivo.</p>
-     *
-     * <p>Recusa clientes incompletos (sem ID ou com dado vazio,
-     * como os criados pelo construtor padrão e ainda não
-     * preenchidos). Se fossem gravados, o construtor com parâmetros
-     * os rejeitaria na leitura e o arquivo inteiro deixaria de abrir.</p>
+     * nunca chega ao arquivo. Recusa clientes incompletos: se fossem
+     * gravados, o construtor com parâmetros os rejeitaria na leitura
+     * e o arquivo inteiro deixaria de abrir.</p>
      *
      * @param cliente cliente a converter
      * @return objeto JSON com os dados do cliente
      * @throws IllegalArgumentException se o cliente estiver incompleto
      */
     private JSONObject clienteParaJson(Cliente cliente) {
-        exigirClienteCompleto(cliente);
+        exigirPessoaCompleta(cliente);
+        if (cliente.getEndereco().isBlank()
+                || cliente.getTelefone().isBlank()
+                || cliente.getCpfPseudo().isBlank()) {
+            throw new IllegalArgumentException(
+                    "Cliente incompleto não pode ser gravado: " + cliente);
+        }
 
         JSONObject json = new JSONObject();
         json.put("id", cliente.getId());
@@ -187,37 +222,67 @@ public class RepositorioJson {
     }
 
     /**
-     * Confere se o cliente tem ID e todos os dados preenchidos.
+     * Converte uma lista de funcionários em um array JSON.
      *
-     * @param cliente cliente a conferir
-     * @throws IllegalArgumentException se o cliente estiver incompleto
+     * @param funcionarios funcionários a converter
+     * @return array JSON com um objeto por funcionário
      */
-    private void exigirClienteCompleto(Cliente cliente) {
-        boolean incompleto = cliente.getId() <= 0
-                || cliente.getNome().isBlank()
-                || cliente.getEndereco().isBlank()
-                || cliente.getTelefone().isBlank()
-                || cliente.getEmail().isBlank()
-                || cliente.getCpfPseudo().isBlank();
-        if (incompleto) {
-            throw new IllegalArgumentException(
-                    "Cliente incompleto não pode ser gravado: " + cliente);
+    private JSONArray funcionariosParaJson(List<Funcionario> funcionarios) {
+        JSONArray lista = new JSONArray();
+        for (Funcionario funcionario : funcionarios) {
+            lista.put(funcionarioParaJson(funcionario));
         }
+        return lista;
     }
 
     /**
-     * Converte um array JSON em lista de clientes.
+     * Converte um funcionário em objeto JSON.
      *
-     * @param lista array JSON lido do arquivo
-     * @return os clientes reconstruídos
-     * @throws JSONException se algum objeto não tiver os campos esperados
+     * <p>O campo {@code perfil} guarda se é colaborador ou
+     * administrador, para recriar o objeto da subclasse certa na
+     * leitura. A senha é gravada como texto, porque criptografia está
+     * fora do escopo da disciplina.</p>
+     *
+     * @param funcionario funcionário a converter
+     * @return objeto JSON com os dados do funcionário
+     * @throws IllegalArgumentException se o funcionário estiver incompleto
      */
-    private List<Cliente> jsonParaClientes(JSONArray lista) {
-        List<Cliente> clientes = new ArrayList<>();
-        for (int i = 0; i < lista.length(); i++) {
-            clientes.add(jsonParaCliente(lista.getJSONObject(i)));
+    private JSONObject funcionarioParaJson(Funcionario funcionario) {
+        exigirPessoaCompleta(funcionario);
+        if (funcionario.getSenha().isBlank()) {
+            throw new IllegalArgumentException(
+                    "Funcionário sem senha não pode ser gravado: " + funcionario);
         }
-        return clientes;
+
+        JSONObject json = new JSONObject();
+        json.put("id", funcionario.getId());
+        // instanceof diz qual é a subclasse real do objeto.
+        json.put("perfil", funcionario instanceof Administrador
+                ? PERFIL_ADMINISTRADOR : PERFIL_COLABORADOR);
+        json.put("nome", funcionario.getNome());
+        json.put("email", funcionario.getEmail());
+        json.put("senha", funcionario.getSenha());
+        json.put("ativo", funcionario.isAtivo());
+        return json;
+    }
+
+    /**
+     * Confere se a pessoa tem ID, nome e e-mail preenchidos.
+     *
+     * <p>Recebe {@link Pessoa}, então serve tanto para clientes quanto
+     * para funcionários.</p>
+     *
+     * @param pessoa cliente ou funcionário a conferir
+     * @throws IllegalArgumentException se faltar algum desses dados
+     */
+    private void exigirPessoaCompleta(Pessoa pessoa) {
+        boolean incompleta = pessoa.getId() <= 0
+                || pessoa.getNome().isBlank()
+                || pessoa.getEmail().isBlank();
+        if (incompleta) {
+            throw new IllegalArgumentException(
+                    "Cadastro incompleto não pode ser gravado: " + pessoa);
+        }
     }
 
     /**
@@ -225,7 +290,7 @@ public class RepositorioJson {
      *
      * <p>Usa o construtor com parâmetros, que valida os dados.
      * Se o cliente estava desativado, a situação é restaurada
-     * com {@link Cliente#desativar()}.</p>
+     * com {@link Pessoa#desativar()}.</p>
      *
      * @param json objeto JSON de um cliente
      * @return o cliente reconstruído
@@ -245,6 +310,57 @@ public class RepositorioJson {
             cliente.desativar();
         }
         return cliente;
+    }
+
+    /**
+     * Reconstrói um funcionário a partir de um objeto JSON.
+     *
+     * <p>O campo {@code perfil} decide qual subclasse é criada:
+     * {@link Administrador} ou {@link Colaborador}. Os dois passam pelo
+     * construtor com parâmetros, que valida os dados.</p>
+     *
+     * @param json objeto JSON de um funcionário
+     * @return o funcionário reconstruído
+     * @throws JSONException se faltar algum campo obrigatório
+     */
+    private Funcionario jsonParaFuncionario(JSONObject json) {
+        int id = json.getInt("id");
+        String nome = json.getString("nome");
+        String email = json.getString("email");
+        String senha = json.getString("senha");
+
+        Funcionario funcionario;
+        if (PERFIL_ADMINISTRADOR.equals(json.getString("perfil"))) {
+            funcionario = new Administrador(id, nome, email, senha);
+        } else {
+            funcionario = new Colaborador(id, nome, email, senha);
+        }
+
+        if (!json.getBoolean("ativo")) {
+            funcionario.desativar();
+        }
+        return funcionario;
+    }
+
+    /**
+     * Lê o arquivo e devolve uma das listas do objeto principal.
+     *
+     * @param chave nome da lista ({@code "clientes"}, {@code "funcionarios"}...)
+     * @return a lista; vazia se o arquivo ou a lista não existirem
+     * @throws IOException se não for possível ler o arquivo
+     * @throws JSONException se o conteúdo não for um JSON válido
+     */
+    private JSONArray lerLista(String chave) throws IOException {
+        // No primeiro uso o arquivo ainda não existe: não há o que carregar.
+        if (Files.notExists(arquivo)) {
+            return new JSONArray();
+        }
+        JSONObject raiz = new JSONObject(lerTexto());
+
+        // optJSONArray devolve null em vez de lançar erro quando a
+        // lista não existe no arquivo.
+        JSONArray lista = raiz.optJSONArray(chave);
+        return lista == null ? new JSONArray() : lista;
     }
 
     /**
