@@ -4,6 +4,9 @@
  */
 package com.mycompany.academia.milho.verde.model;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Representa um cliente cadastrado na Academia Milho Verde.
  *
@@ -12,7 +15,7 @@ package com.mycompany.academia.milho.verde.model;
  * pseudonimizado. O cliente não usa o sistema: é cadastrado e
  * atendido pelos funcionários.</p>
  *
- * @author Aline Ferreira Pena
+ * @author Aline Ferreira
  */
 public class Cliente extends Pessoa {
 
@@ -36,6 +39,12 @@ public class Cliente extends Pessoa {
     private String cpfPseudo;
 
     /**
+     * Extratos das compras do cliente, que formam a conta dele
+     * (item 10).
+     */
+    private List<Extrato> extratos;
+
+    /**
      * Construtor padrão: cria um cliente em branco.
      *
      * <p>{@code super()} cria a parte comum em branco; endereço,
@@ -48,6 +57,8 @@ public class Cliente extends Pessoa {
         this.endereco = "";
         this.telefone = "";
         this.cpfPseudo = "";
+        this.extratos = new ArrayList<>();
+        contarInstancia();
     }
 
     /**
@@ -78,6 +89,19 @@ public class Cliente extends Pessoa {
         this.endereco = exigirTexto(novoEndereco, "endereço");
         this.telefone = exigirTexto(novoTelefone, "telefone");
         this.cpfPseudo = exigirTexto(novoCpfPseudo, "CPF pseudonimizado");
+        this.extratos = new ArrayList<>();
+        contarInstancia();
+    }
+
+    /**
+     * Soma 1 nos dois contadores de clientes da classe {@link Sistema}
+     * (itens 11a e 11b). Chamado pelos dois construtores.
+     */
+    private static void contarInstancia() {
+        // Estratégia 1: private static, por get e set.
+        Sistema.setTotalClientes(Sistema.getTotalClientes() + 1);
+        // Estratégia 2: protected static, acesso direto no mesmo pacote.
+        Sistema.totalClientesProtegido++;
     }
 
     /**
@@ -108,6 +132,18 @@ public class Cliente extends Pessoa {
     }
 
     /**
+     * Retorna os extratos das compras do cliente.
+     *
+     * <p>Devolve uma cópia: extratos só entram quando uma venda é
+     * fechada, por {@link Venda#gerarExtrato(int)}.</p>
+     *
+     * @return cópia da lista de extratos
+     */
+    public List<Extrato> getExtratos() {
+        return new ArrayList<>(extratos);
+    }
+
+    /**
      * Atualiza os dados cadastrais do cliente.
      *
      * <p>Todos os dados são validados antes de qualquer alteração.
@@ -134,6 +170,27 @@ public class Cliente extends Pessoa {
         this.endereco = enderecoValido;
         this.telefone = telefoneValido;
         this.cpfPseudo = cpfValido;
+    }
+
+    /**
+     * Guarda o extrato de uma compra do cliente.
+     *
+     * <p>Tem acesso de pacote: é chamado por
+     * {@link Venda#gerarExtrato(int)} quando a venda é fechada.</p>
+     *
+     * @param extrato extrato de uma venda deste cliente
+     * @throws IllegalArgumentException se o extrato for nulo ou de
+     *         outro cliente
+     */
+    void adicionarExtrato(Extrato extrato) {
+        if (extrato == null) {
+            throw new IllegalArgumentException("O extrato é obrigatório.");
+        }
+        if (extrato.getCliente() != this) {
+            throw new IllegalArgumentException(
+                    "O extrato pertence a outro cliente.");
+        }
+        extratos.add(extrato);
     }
 
     /**

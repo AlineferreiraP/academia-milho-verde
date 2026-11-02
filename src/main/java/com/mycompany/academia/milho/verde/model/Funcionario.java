@@ -12,11 +12,11 @@ package com.mycompany.academia.milho.verde.model;
  * Não existe um funcionário "genérico"; os objetos são sempre
  * {@code Colaborador} ou {@code Administrador}.</p>
  *
- * <p>A senha não tem getter e não aparece no {@code toString}: ela só
+ * <p>A senha não tem getter público e não aparece no {@code toString}: ela só
  * é conferida por {@link #verificarSenha(String)} e trocada por
  * {@link #alterarSenha(String, String)}.</p>
  *
- * @author Aline Ferreira Pena
+ * @author Aline Ferreira
  */
 public abstract class Funcionario extends Pessoa {
 
@@ -111,7 +111,8 @@ public abstract class Funcionario extends Pessoa {
         }
         return false;
     }
-        /**
+
+    /**
      * Retorna a senha para ser gravada no arquivo JSON.
      *
      * <p>Tem acesso de pacote (sem modificador): só as classes do
@@ -124,6 +125,7 @@ public abstract class Funcionario extends Pessoa {
     String getSenha() {
         return senha;
     }
+
     /**
      * Informa se o funcionário pode usar as despesas e o balanço mensal.
      *

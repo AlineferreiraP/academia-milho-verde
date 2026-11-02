@@ -13,7 +13,7 @@ package com.mycompany.academia.milho.verde.model;
  * em {@link #podeAcessarFinanceiro()}, que aqui responde
  * {@code false}.</p>
  *
- * @author Aline Ferreira Pena
+ * @author Aline Ferreira
  */
 public class Colaborador extends Funcionario {
 
