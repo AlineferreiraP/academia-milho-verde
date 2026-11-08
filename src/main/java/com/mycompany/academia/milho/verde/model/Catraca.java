@@ -101,6 +101,15 @@ public class Catraca {
     public int getQuantidadePresentes() {
         return presentes.size();
     }
+        /**
+     * Informa se um cliente está na academia agora.
+     *
+     * @param idCliente identificador do cliente
+     * @return {@code true} se a última passagem dele foi uma entrada
+     */
+    public boolean estaPresente(int idCliente) {
+        return buscarPresente(idCliente) != null;
+    }
 
     /**
      * Lista os registros de um dia.

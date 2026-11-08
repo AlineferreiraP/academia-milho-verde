@@ -86,19 +86,31 @@ public class AcademiaController {
         this.repositorio = novoRepositorio;
     }
 
-    /**
+        /**
      * Executa o programa: carrega os dados, faz o primeiro acesso se
-     * for preciso, pede o login e mostra o menu principal até o
-     * usuário sair.
+     * for preciso e mostra a tela inicial até o usuário sair.
+     *
+     * <p>A tela inicial tem duas entradas: a dos funcionários, com
+     * login, e o terminal da catraca externa, que não faz login.</p>
      */
     public void iniciar() {
         view.mostrarMensagem("===== Academia Milho Verde =====");
         try {
             carregarDados();
             prepararPrimeiroAcesso();
-            fazerLogin();
-            while (sistema.getUsuarioLogado() != null) {
-                executarMenuPrincipal();
+            int opcao = -1;
+            while (opcao != 0) {
+                opcao = view.mostrarMenu("Tela inicial", new String[] {
+                    "Entrar (funcionário)",
+                    "Terminal da catraca (simula o equipamento)"});
+                if (opcao == 1) {
+                    fazerLogin();
+                    while (sistema.getUsuarioLogado() != null) {
+                        executarMenuPrincipal();
+                    }
+                } else if (opcao == 2) {
+                    terminalCatraca();
+                }
             }
         } catch (IllegalStateException erro) {
             // A entrada acabou (ou o primeiro acesso falhou): encerra.
@@ -106,7 +118,6 @@ public class AcademiaController {
         }
         view.mostrarMensagem("Até logo!");
     }
-
     /**
      * Mostra o menu principal uma vez e executa a opção escolhida.
      */
@@ -149,9 +160,7 @@ public class AcademiaController {
                 break;
             default:
                 sistema.logout();
-                salvarDados();
                 view.mostrarMensagem("Sessão encerrada.");
-                fazerLogin();
                 break;
         }
         salvarDados();
@@ -237,7 +246,7 @@ public class AcademiaController {
         while (opcao != 0) {
             opcao = view.mostrarMenu("Clientes", new String[] {
                 "Cadastrar", "Editar", "Remover (desativar)",
-                "Buscar por ID", "Listar", "Emitir conta"});
+                "Buscar por ID", "Listar", "Emitir conta", "Buscar por nome", "Reativar"});
             try {
                 switch (opcao) {
                     case 1:
@@ -269,19 +278,29 @@ public class AcademiaController {
                                 ? "Cliente não encontrado." : achado.toString());
                         break;
                     case 5:
-                        int ordem = view.mostrarMenu("Ordenar por",
-                                new String[] {"ID", "Nome"});
-                        String criterio = (ordem == 2) ? ComparadorCliente.NOME
-                                : ComparadorCliente.ID;
+                        // Os IDs são gerados em ordem crescente: a lista
+                        // sai na ordem de cadastro, sem perguntar.
                         view.mostrarLista("Clientes ativos",
-                                gestao.listarClientes(criterio));
+                                gestao.listarClientes(ComparadorCliente.ID));
                         break;
                     case 6:
                         emitirConta(gestao);
                         break;
+                    case 7:
+                        // buscarPorNome percorre a lista e compara o nome.
+                        view.mostrarLista("Clientes encontrados",
+                                gestao.buscarPorNome(view.lerTexto("Parte do nome")));
+                        break;
+                    case 8:
+                        gestao.reativarCliente(view.lerInteiro("ID do cliente"));
+                        view.mostrarMensagem("Cliente reativado.");
+                        break;
                     default:
                         break;
                 }
+                // Grava logo após cada operação: nada se perde se o
+                // programa for fechado dentro do submenu.
+                salvarDados();
             } catch (IllegalArgumentException | IllegalStateException erro) {
                 view.mostrarErro(erro.getMessage());
             }
@@ -318,7 +337,7 @@ public class AcademiaController {
         while (opcao != 0) {
             opcao = view.mostrarMenu("Funcionários", new String[] {
                 "Cadastrar colaborador", "Cadastrar administrador",
-                "Editar", "Remover (desativar)",
+                "Editar", "Remover",
                 "Alterar senha de administrador", "Listar"});
             try {
                 switch (opcao) {
@@ -343,8 +362,14 @@ public class AcademiaController {
                         view.mostrarMensagem("Funcionário atualizado.");
                         break;
                     case 4:
-                        gestao.removerFuncionario(view.lerInteiro("ID"));
-                        view.mostrarMensagem("Funcionário desativado.");
+                        int idRemover = view.lerInteiro("ID");
+                        // Quem está logado não pode apagar o próprio cadastro.
+                        if (idRemover == sistema.getUsuarioLogado().getId()) {
+                            throw new IllegalStateException(
+                                    "Você não pode remover o seu próprio cadastro.");
+                        }
+                        gestao.removerFuncionario(idRemover);
+                        view.mostrarMensagem("Funcionário removido.");
                         break;
                     case 5:
                         boolean trocou = gestao.alterarSenhaAdministrador(
@@ -361,6 +386,9 @@ public class AcademiaController {
                     default:
                         break;
                 }
+                // Grava logo após cada operação: nada se perde se o
+                // programa for fechado dentro do submenu.
+                salvarDados();
             } catch (IllegalArgumentException | IllegalStateException erro) {
                 view.mostrarErro(erro.getMessage());
             }
@@ -436,6 +464,9 @@ public class AcademiaController {
                     default:
                         break;
                 }
+                // Grava logo após cada operação: nada se perde se o
+                // programa for fechado dentro do submenu.
+                salvarDados();
             } catch (IllegalArgumentException | IllegalStateException erro) {
                 view.mostrarErro(erro.getMessage());
             }
@@ -528,6 +559,9 @@ public class AcademiaController {
                     default:
                         break;
                 }
+                // Grava logo após cada operação: nada se perde se o
+                // programa for fechado dentro do submenu.
+                salvarDados();
             } catch (IllegalArgumentException | IllegalStateException erro) {
                 view.mostrarErro(erro.getMessage());
             }
@@ -557,50 +591,74 @@ public class AcademiaController {
         view.imprimirExtrato(venda.getExtrato());
     }
 
-    // ------------------------------------------------------------ catraca
+       // ------------------------------------------------------------ catraca
 
     /**
-     * Menu da catraca: simula os eventos da catraca externa e consulta
-     * os registros.
+     * Terminal da catraca externa: simula o equipamento da entrada.
+     *
+     * <p>Não pede login, porque quem usa é o cliente. Ele informa o ID
+     * (como se passasse o cartão) e o Sistema decide sozinho se é
+     * entrada ou saída. Cliente inexistente ou desativado tem o acesso
+     * negado.</p>
+     */
+    private void terminalCatraca() {
+        view.mostrarMensagem("--- Catraca: passe o cartão (digite o seu ID) ---");
+        int id = view.lerInteiro("ID do cliente (0 para voltar)");
+        while (id != 0) {
+            try {
+                RegistroCatraca registro = sistema.passarNaCatraca(id,
+                        LocalDateTime.now());
+                if (RegistroCatraca.ENTRADA.equals(registro.getTipo())) {
+                    view.mostrarMensagem("Entrada liberada. Bom treino, "
+                            + registro.getCliente().getNome() + "!");
+                } else {
+                    view.mostrarMensagem("Saída registrada. Até logo, "
+                            + registro.getCliente().getNome() + "!");
+                }
+                salvarDados();
+            } catch (IllegalArgumentException | IllegalStateException erro) {
+                view.mostrarErro("Acesso negado: " + erro.getMessage());
+            }
+            id = view.lerInteiro("ID do cliente (0 para voltar)");
+        }
+    }
+
+    /**
+     * Menu da catraca para os funcionários: só consulta. Entradas e
+     * saídas vêm do terminal da catraca, não do funcionário.
      */
     private void menuCatraca() {
         int opcao = -1;
         while (opcao != 0) {
-            opcao = view.mostrarMenu("Catraca", new String[] {
-                "Registrar entrada", "Registrar saída", "Quem está na academia",
-                "Registros de um dia", "Registros de um mês",
-                "Registros de um ano", "Registros de um cliente"});
+            opcao = view.mostrarMenu("Catraca (consultas)", new String[] {
+                "Quem está na academia", "Registros de um dia",
+                "Registros de um mês", "Registros de um ano",
+                "Registros de um cliente"});
             try {
                 switch (opcao) {
                     case 1:
-                        registrarEvento(RegistroCatraca.ENTRADA);
-                        break;
-                    case 2:
-                        registrarEvento(RegistroCatraca.SAIDA);
-                        break;
-                    case 3:
                         view.mostrarMensagem("Pessoas na academia: "
                                 + sistema.getCatraca().getQuantidadePresentes());
                         view.mostrarLista("Presentes",
                                 sistema.getCatraca().getPresentes());
                         break;
-                    case 4:
+                    case 2:
                         view.mostrarLista("Registros do dia",
                                 sistema.getCatraca().registrosDoDia(
                                         view.lerData("Dia")));
                         break;
-                    case 5:
+                    case 3:
                         view.mostrarLista("Registros do mês",
                                 sistema.getCatraca().registrosDoMes(
                                         view.lerInteiro("Ano"),
                                         view.lerInteiro("Mês")));
                         break;
-                    case 6:
+                    case 4:
                         view.mostrarLista("Registros do ano",
                                 sistema.getCatraca().registrosDoAno(
                                         view.lerInteiro("Ano")));
                         break;
-                    case 7:
+                    case 5:
                         view.mostrarLista("Registros do cliente",
                                 sistema.getCatraca().registrosDoCliente(
                                         view.lerInteiro("ID do cliente")));
@@ -612,18 +670,6 @@ public class AcademiaController {
                 view.mostrarErro(erro.getMessage());
             }
         }
-    }
-
-    /**
-     * Repassa ao sistema um evento da catraca, com a hora atual.
-     *
-     * @param tipo {@link RegistroCatraca#ENTRADA} ou
-     *        {@link RegistroCatraca#SAIDA}
-     */
-    private void registrarEvento(String tipo) {
-        RegistroCatraca registro = sistema.receberEventoCatraca(
-                view.lerInteiro("ID do cliente"), tipo, LocalDateTime.now());
-        view.mostrarMensagem("Registrado: " + registro);
     }
 
     // ---------------------------------------------------------- relatórios
@@ -651,6 +697,9 @@ public class AcademiaController {
                     default:
                         break;
                 }
+                // Grava logo após cada operação: nada se perde se o
+                // programa for fechado dentro do submenu.
+                salvarDados();
             } catch (IllegalArgumentException | IllegalStateException erro) {
                 view.mostrarErro(erro.getMessage());
             }
@@ -697,6 +746,9 @@ public class AcademiaController {
                     default:
                         break;
                 }
+                // Grava logo após cada operação: nada se perde se o
+                // programa for fechado dentro do submenu.
+                salvarDados();
             } catch (IllegalArgumentException | IllegalStateException erro) {
                 view.mostrarErro(erro.getMessage());
             }

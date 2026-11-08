@@ -4,6 +4,9 @@
  */
 package com.mycompany.academia.milho.verde.model;
 
+import com.mycompany.academia.milho.verde.dao.ClienteDAO;
+import com.mycompany.academia.milho.verde.dao.ClienteDAOMemoria;
+
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
@@ -13,20 +16,24 @@ import java.time.LocalDateTime;
 /**
  * Coordena o sistema da Academia Milho Verde.
  *
- * <p>Não guarda as listas de dados: cria as classes de gestão e a
- * catraca e dá acesso a elas (padrão Facade). Os getters das gestões
- * só funcionam com um funcionário logado, e a gestão financeira só é
- * entregue a quem {@link Funcionario#podeAcessarFinanceiro()} — o
- * colaborador recebe {@code false}, o administrador {@code true}.</p>
+ * <p>
+ * Não guarda as listas de dados: cria as classes de gestão e a catraca e dá
+ * acesso a elas (padrão Facade). Os getters das gestões só funcionam com um
+ * funcionário logado, e a gestão financeira só é entregue a quem
+ * {@link Funcionario#podeAcessarFinanceiro()} — o colaborador recebe
+ * {@code false}, o administrador {@code true}.</p>
  *
- * <p>Também guarda os membros da classe (static): as quatro salas, os
- * contadores de instâncias (itens 11 e 12) e o tratamento do CPF.</p>
+ * <p>
+ * Também guarda os membros da classe (static): as quatro salas, os contadores
+ * de instâncias (itens 11 e 12) e o tratamento do CPF.</p>
  *
  * @author Aline Ferreira
  */
 public class Sistema {
 
-    /** As quatro salas da academia, criadas uma única vez. */
+    /**
+     * As quatro salas da academia, criadas uma única vez.
+     */
     private static final Sala[] SALAS = {
         new Sala(1, Sala.SPINNING, 20),
         new Sala(2, Sala.MUSCULACAO, 40),
@@ -34,42 +41,67 @@ public class Sistema {
         new Sala(4, Sala.PILATES, 15)
     };
 
-    /** Item 11a: clientes criados, private com get e set. */
+    /**
+     * Item 11a: clientes criados, private com get e set.
+     */
     private static int totalClientes = 0;
 
-    /** Item 11b: clientes criados, protected (acesso direto no pacote). */
+    /**
+     * Item 11b: clientes criados, protected (acesso direto no pacote).
+     */
     protected static int totalClientesProtegido = 0;
 
-    /** Item 12: produtos criados. */
+    /**
+     * Item 12: produtos criados.
+     */
     private static int totalProdutos = 0;
 
-    /** Gestão dos clientes. */
+    /**
+     * Gestão dos clientes.
+     */
     private GestaoClientes gestaoClientes;
 
-    /** Gestão dos funcionários. */
+    /**
+     * Gestão dos funcionários.
+     */
     private GestaoFuncionarios gestaoFuncionarios;
 
-    /** Gestão das aulas e dos agendamentos. */
+    /**
+     * Gestão das aulas e dos agendamentos.
+     */
     private GestaoAgendamentos gestaoAgendamentos;
 
-    /** Gestão da lojinha, da lanchonete e das vendas. */
+    /**
+     * Gestão da lojinha, da lanchonete e das vendas.
+     */
     private GestaoVendas gestaoVendas;
 
-    /** Gestão das despesas e do balanço. */
+    /**
+     * Gestão das despesas e do balanço.
+     */
     private GestaoFinanceiro gestaoFinanceiro;
 
-    /** Catraca de acesso. */
+    /**
+     * Catraca de acesso.
+     */
     private Catraca catraca;
 
-    /** Funcionário que fez login, ou {@code null}. */
+    /**
+     * Funcionário que fez login, ou {@code null}.
+     */
     private Funcionario usuarioLogado;
 
     /**
-     * Construtor padrão: cria as gestões e a catraca, sem dados e sem
-     * ninguém logado.
+     * Construtor padrão: cria as gestões e a catraca, sem dados e sem ninguém
+     * logado. Os clientes ficam na memória.
      */
     public Sistema() {
-        this.gestaoClientes = new GestaoClientes();
+        this(new ClienteDAOMemoria());
+    }
+
+    // Usa o DAO informado para guardar os clientes; o resto é igual ao padrão.
+    public Sistema(ClienteDAO clienteDAO) {
+        this.gestaoClientes = new GestaoClientes(clienteDAO);
         this.gestaoFuncionarios = new GestaoFuncionarios();
         this.gestaoVendas = new GestaoVendas();
         this.catraca = new Catraca();
@@ -82,10 +114,13 @@ public class Sistema {
     /**
      * Retorna as quatro salas.
      *
-     * <p>Devolve uma cópia do vetor, para ninguém trocar as salas.</p>
+     * <p>
+     * Devolve uma cópia do vetor, para ninguém trocar as salas.</p>
      *
      * @return vetor com as salas
      */
+    
+    
     public static Sala[] getSalas() {
         return SALAS.clone();
     }
@@ -143,10 +178,10 @@ public class Sistema {
     /**
      * Pseudonimiza o CPF: guarda só um código gerado a partir dele.
      *
-     * <p>Usa SHA-256 com um texto fixo à frente e fica com os 16
-     * primeiros caracteres. O mesmo CPF dá sempre o mesmo código, o que
-     * permite achar duplicados, mas o número original não pode ser
-     * recuperado do código.</p>
+     * <p>
+     * Usa SHA-256 com um texto fixo à frente e fica com os 16 primeiros
+     * caracteres. O mesmo CPF dá sempre o mesmo código, o que permite achar
+     * duplicados, mas o número original não pode ser recuperado do código.</p>
      *
      * @param cpf CPF com 11 dígitos (pontos e traço são ignorados)
      * @return o código pseudonimizado
@@ -195,7 +230,7 @@ public class Sistema {
      * @throws IllegalArgumentException se algum dado for inválido
      */
     public Administrador criarPrimeiroAdministrador(String nome, String email,
-                                                    String senha) {
+            String senha) {
         if (temFuncionarios()) {
             throw new IllegalStateException(
                     "O primeiro administrador só pode ser criado quando não há funcionários.");
@@ -283,8 +318,8 @@ public class Sistema {
      * Retorna a gestão financeira, só para quem tem acesso a ela.
      *
      * @return a gestão
-     * @throws IllegalStateException se ninguém estiver logado ou se o
-     *         usuário não for administrador
+     * @throws IllegalStateException se ninguém estiver logado ou se o usuário
+     * não for administrador
      */
     public GestaoFinanceiro getGestaoFinanceiro() {
         exigirLogin();
@@ -308,22 +343,44 @@ public class Sistema {
      *
      * @param idCliente identificador do cliente
      * @param tipo {@link RegistroCatraca#ENTRADA} ou
-     *        {@link RegistroCatraca#SAIDA}
+     * {@link RegistroCatraca#SAIDA}
      * @param dataHora data e hora da passagem
      * @return o registro criado
-     * @throws IllegalArgumentException se o cliente não existir ou
-     *         estiver desativado
-     * @throws IllegalStateException se o evento não combina com a
-     *         situação do cliente (por exemplo, entrada de quem já entrou)
+     * @throws IllegalArgumentException se o cliente não existir ou estiver
+     * desativado
+     * @throws IllegalStateException se o evento não combina com a situação do
+     * cliente (por exemplo, entrada de quem já entrou)
      */
     public RegistroCatraca receberEventoCatraca(int idCliente, String tipo,
-                                                LocalDateTime dataHora) {
+            LocalDateTime dataHora) {
         Cliente cliente = gestaoClientes.buscarCliente(idCliente);
         if (cliente == null || !cliente.isAtivo()) {
             throw new IllegalArgumentException(
                     "Cliente " + idCliente + " não encontrado ou desativado.");
         }
         return catraca.receberEvento(cliente, tipo, dataHora);
+    }
+
+    /**
+     * Registra a passagem de um cliente pela catraca externa, decidindo sozinho
+     * se é entrada ou saída.
+     *
+     * <p>
+     * É o que o equipamento da catraca chama quando o cliente passa o cartão:
+     * não exige login de funcionário. Se o cliente está fora, registra
+     * {@link RegistroCatraca#ENTRADA}; se está dentro,
+     * {@link RegistroCatraca#SAIDA}.</p>
+     *
+     * @param idCliente identificador do cliente
+     * @param dataHora data e hora da passagem
+     * @return o registro criado
+     * @throws IllegalArgumentException se o cliente não existir ou estiver
+     * desativado (acesso negado)
+     */
+    public RegistroCatraca passarNaCatraca(int idCliente, LocalDateTime dataHora) {
+        String tipo = catraca.estaPresente(idCliente)
+                ? RegistroCatraca.SAIDA : RegistroCatraca.ENTRADA;
+        return receberEventoCatraca(idCliente, tipo, dataHora);
     }
 
     /**
@@ -362,8 +419,9 @@ public class Sistema {
     /**
      * Confere se o usuário logado pode acessar o financeiro.
      *
-     * <p>Chama {@code podeAcessarFinanceiro()} do funcionário; o
-     * resultado depende da subclasse real (polimorfismo).</p>
+     * <p>
+     * Chama {@code podeAcessarFinanceiro()} do funcionário; o resultado depende
+     * da subclasse real (polimorfismo).</p>
      *
      * @throws IllegalStateException se não puder
      */

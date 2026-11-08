@@ -1,0 +1,255 @@
+{
+  "agendamentos": [
+    {
+      "tipoCobranca": "MENSALIDADE",
+      "preco": 120,
+      "cartao": "4111111111111234",
+      "idCliente": 1,
+      "aulas": [
+        {
+          "instrutor": "Rafa",
+          "codigoSala": 1,
+          "id": 1,
+          "dataHora": "2026-12-08T09:00"
+        },
+        {
+          "instrutor": "Rafa",
+          "codigoSala": 1,
+          "id": 2,
+          "dataHora": "2026-12-08T10:00"
+        }
+      ],
+      "valorDevolvido": 60,
+      "id": 1,
+      "status": "CANCELADO"
+    },
+    {
+      "tipoCobranca": "DIARIA",
+      "preco": 40,
+      "cartao": "5500000000000004",
+      "idCliente": 2,
+      "aulas": [{
+        "instrutor": "Marina",
+        "codigoSala": 4,
+        "id": 3,
+        "dataHora": "2026-12-08T09:00"
+      }],
+      "valorDevolvido": 0,
+      "id": 2,
+      "status": "CANCELADO"
+    },
+    {
+      "tipoCobranca": "DIARIA",
+      "preco": 45,
+      "cartao": "5500000000000004",
+      "idCliente": 2,
+      "aulas": [{
+        "instrutor": "Rafa",
+        "codigoSala": 1,
+        "id": 2,
+        "dataHora": "2026-12-08T10:00"
+      }],
+      "valorDevolvido": 0,
+      "id": 3,
+      "status": "CANCELADO"
+    },
+    {
+      "tipoCobranca": "DIARIA",
+      "preco": 50,
+      "cartao": "4111111111111234",
+      "idCliente": 1,
+      "aulas": [{
+        "instrutor": "Rafa",
+        "codigoSala": 1,
+        "id": 2,
+        "dataHora": "2026-12-08T10:00"
+      }],
+      "valorDevolvido": 0,
+      "id": 4,
+      "status": "CANCELADO"
+    },
+    {
+      "tipoCobranca": "DIARIA",
+      "preco": 30,
+      "cartao": "4111111111111234",
+      "idCliente": 1,
+      "aulas": [{
+        "instrutor": "Rafa",
+        "codigoSala": 1,
+        "id": 1,
+        "dataHora": "2026-12-08T09:00"
+      }],
+      "valorDevolvido": 0,
+      "id": 5,
+      "status": "PRELIMINAR"
+    }
+  ],
+  "produtos": [
+    {
+      "preco": 40,
+      "categoria": "LOJA",
+      "nome": "Luva de musculação",
+      "id": 2,
+      "quantidade": 10
+    },
+    {
+      "preco": 8.5,
+      "categoria": "LANCHONETE",
+      "nome": "Barra de proteína",
+      "id": 3,
+      "quantidade": 17
+    }
+  ],
+  "aulas": [
+    {
+      "instrutor": "Rafa",
+      "codigoSala": 1,
+      "id": 1,
+      "dataHora": "2026-12-08T09:00"
+    },
+    {
+      "instrutor": "Rafa",
+      "codigoSala": 1,
+      "id": 2,
+      "dataHora": "2026-12-08T10:00"
+    }
+  ],
+  "registrosCatraca": [
+    {
+      "tipo": "ENTRADA",
+      "idCliente": 1,
+      "id": 1,
+      "dataHora": "2026-11-08T09:49:08.610113915"
+    },
+    {
+      "tipo": "ENTRADA",
+      "idCliente": 2,
+      "id": 2,
+      "dataHora": "2026-11-08T09:49:08.610113915"
+    },
+    {
+      "tipo": "SAIDA",
+      "idCliente": 1,
+      "id": 3,
+      "dataHora": "2026-11-08T10:49:08.610113915"
+    }
+  ],
+  "vendas": [
+    {
+      "tipo": "MENSALIDADE",
+      "idExtrato": 1,
+      "itens": [],
+      "idCliente": 1,
+      "valorTotal": 120,
+      "id": 1,
+      "dataHora": "2026-11-08T09:49:08.594094568"
+    },
+    {
+      "tipo": "DIARIA",
+      "idExtrato": 2,
+      "itens": [],
+      "idCliente": 2,
+      "valorTotal": 40,
+      "id": 2,
+      "dataHora": "2026-11-08T09:49:08.595898155"
+    },
+    {
+      "tipo": "PRODUTO",
+      "idExtrato": 3,
+      "itens": [
+        {
+          "precoUnitario": 4,
+          "idProduto": 1,
+          "categoria": "LANCHONETE",
+          "nomeProduto": "Água 500 ml",
+          "quantidade": 2
+        },
+        {
+          "precoUnitario": 8.5,
+          "idProduto": 3,
+          "categoria": "LANCHONETE",
+          "nomeProduto": "Barra de proteína",
+          "quantidade": 3
+        }
+      ],
+      "idCliente": 1,
+      "valorTotal": 33.5,
+      "id": 3,
+      "dataHora": "2026-11-08T09:49:08.599895644"
+    }
+  ],
+  "funcionarios": [
+    {
+      "senha": "carlos123",
+      "ativo": true,
+      "nome": "Carlos Pena",
+      "id": 1,
+      "email": "carlos@academia.com",
+      "perfil": "ADMINISTRADOR"
+    },
+    {
+      "senha": "bia123",
+      "ativo": true,
+      "nome": "Bia Rocha",
+      "id": 2,
+      "email": "bia@academia.com",
+      "perfil": "COLABORADOR"
+    }
+  ],
+  "clientes": [
+    {
+      "telefone": "(38) 99999-0000",
+      "ativo": true,
+      "endereco": "Rua das Flores, 10",
+      "cpfPseudo": "6604556811088d08",
+      "nome": "Ana Souza",
+      "id": 1,
+      "email": "ana@gmail.com"
+    },
+    {
+      "telefone": "(38) 98888-1111",
+      "ativo": true,
+      "endereco": "Av. Central, 50",
+      "cpfPseudo": "11fc2f60793c0a00",
+      "nome": "João Lima Filho",
+      "id": 2,
+      "email": "joao@gmail.com"
+    },
+    {
+      "telefone": "(38) 97777-2222",
+      "ativo": false,
+      "endereco": "Rua do Rosário, 42",
+      "cpfPseudo": "6c74f4e5a3708003",
+      "nome": "Carla Mendes",
+      "id": 3,
+      "email": "carla@gmail.com"
+    }
+  ],
+  "despesas": [{
+    "data": "2026-11-08",
+    "categoria": "FUNCIONARIOS",
+    "valor": 1800,
+    "id": 2,
+    "descricao": "Salário da recepção"
+  }],
+  "relatorios": [
+    {
+      "idsVendas": [
+        1,
+        2,
+        3
+      ],
+      "inicio": "2026-11-08",
+      "fim": "2026-11-08"
+    },
+    {
+      "idsVendas": [
+        1,
+        2,
+        3
+      ],
+      "inicio": "2026-11-01",
+      "fim": "2026-11-30"
+    }
+  ]
+}

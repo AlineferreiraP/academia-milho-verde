@@ -127,6 +127,15 @@ public abstract class Pessoa {
     public void desativar() {
         this.ativo = false;
     }
+        /**
+     * Reativa um cadastro desativado.
+     *
+     * <p>Desfaz {@link #desativar()}: a pessoa volta a aparecer como
+     * ativa, com todo o histórico preservado.</p>
+     */
+    public void ativar() {
+        this.ativo = true;
+    }
 
     /**
      * Define o identificador de uma pessoa criada pelo construtor padrão.

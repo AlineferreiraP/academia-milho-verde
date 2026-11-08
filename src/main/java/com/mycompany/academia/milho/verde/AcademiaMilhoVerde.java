@@ -3,6 +3,7 @@
  */
 package com.mycompany.academia.milho.verde;
 
+import com.mycompany.academia.milho.verde.controller.AcademiaController;
 import com.mycompany.academia.milho.verde.model.Administrador;
 import com.mycompany.academia.milho.verde.model.AgendaSemanal;
 import com.mycompany.academia.milho.verde.model.Agendamento;
@@ -42,8 +43,8 @@ import java.util.List;
  * <p>O main testa as classes do Model: clientes, funcionários, a
  * lojinha e, em seguida, o {@link Sistema} com todas as gestões (login,
  * agenda, vendas, catraca, financeiro, comparadores, contadores) e a
- * gravação e leitura em JSON. O programa interativo, com menus, é a
- * classe {@link AcademiaConsole}.</p>
+ * gravação e leitura em JSON. Ao final dos testes, abre o programa
+ * interativo com menus pelo {@link AcademiaController}.</p>
  *
  * @author Aline Ferreira
  */
@@ -240,7 +241,7 @@ public class AcademiaMilhoVerde {
         for (Extrato e : ana.getExtratos()) {
             System.out.println("  " + e);
         }
-        
+
         // ------------------------------------------------- Sistema
         System.out.println();
         System.out.println("=== Sistema: login e permissões ===");
@@ -604,6 +605,13 @@ public class AcademiaMilhoVerde {
             System.out.println("Erro ao acessar o arquivo: "
                     + erro.getMessage());
         }
+
+        // ------------------------------------------------- programa com menus
+        // Depois dos testes, abre o programa interativo (MVC). Os dados
+        // dele ficam em academia.json, separados do arquivo de teste.
+        System.out.println();
+        System.out.println("=== Programa com menus ===");
+        new AcademiaController().iniciar();
     }
 
     /**
