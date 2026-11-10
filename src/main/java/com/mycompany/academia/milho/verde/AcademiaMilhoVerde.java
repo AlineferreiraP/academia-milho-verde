@@ -36,21 +36,26 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.nio.file.Files;
+import com.mycompany.academia.milho.verde.dao.ClienteDAOJson;
 
 /**
  * Classe principal da Academia Milho Verde.
  *
- * <p>O main testa as classes do Model: clientes, funcionários, a
- * lojinha e, em seguida, o {@link Sistema} com todas as gestões (login,
- * agenda, vendas, catraca, financeiro, comparadores, contadores) e a
- * gravação e leitura em JSON. Ao final dos testes, abre o programa
- * interativo com menus pelo {@link AcademiaController}.</p>
+ * <p>
+ * O main testa as classes do Model: clientes, funcionários, a lojinha e, em
+ * seguida, o {@link Sistema} com todas as gestões (login, agenda, vendas,
+ * catraca, financeiro, comparadores, contadores) e a gravação e leitura em
+ * JSON. Ao final dos testes, abre o programa interativo com menus pelo
+ * {@link AcademiaController}.</p>
  *
  * @author Aline Ferreira
  */
 public class AcademiaMilhoVerde {
 
-    /** Classe só com o main: não deve ser instanciada. */
+    /**
+     * Classe só com o main: não deve ser instanciada.
+     */
     private AcademiaMilhoVerde() {
     }
 
@@ -59,7 +64,7 @@ public class AcademiaMilhoVerde {
      *
      * @param args argumentos da linha de comando não utilizados
      */
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
 
         // ------------------------------------------------- clientes
         System.out.println("=== Clientes ===");
@@ -245,7 +250,8 @@ public class AcademiaMilhoVerde {
         // ------------------------------------------------- Sistema
         System.out.println();
         System.out.println("=== Sistema: login e permissões ===");
-        Sistema sistema = new Sistema();
+        Files.deleteIfExists(Path.of("clientes-teste.json"));
+        Sistema sistema = new Sistema(new ClienteDAOJson(Path.of("clientes-teste.json")));
         try {
             sistema.getGestaoClientes();
         } catch (IllegalStateException erro) {
@@ -579,7 +585,7 @@ public class AcademiaMilhoVerde {
             System.out.println("Gravado em: "
                     + repositorio.getArquivo().toAbsolutePath());
 
-            Sistema outro = new Sistema();
+            Sistema outro = new Sistema(new ClienteDAOJson(Path.of("clientes-teste.json")));
             outro.carregar(repositorio);
             System.out.println("Login após carregar: "
                     + outro.login("carlos@academia.com", "carlos123"));

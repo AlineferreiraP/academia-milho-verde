@@ -1,0 +1,110 @@
+[
+  {
+    "telefone": "(38) 99999-0000",
+    "ativo": true,
+    "endereco": "Rua das Flores, 10",
+    "cpfPseudo": "6604556811088d08",
+    "nome": "Ana Souza",
+    "id": 1,
+    "email": "ana@gmail.com"
+  },
+  {
+    "telefone": "(38) 98888-1111",
+    "ativo": true,
+    "endereco": "Av. Central, 5",
+    "cpfPseudo": "11fc2f60793c0a00",
+    "nome": "João Lima",
+    "id": 2,
+    "email": "joao@gmail.com"
+  },
+  {
+    "telefone": "(38) 97777-2222",
+    "ativo": true,
+    "endereco": "Rua do Rosário, 42",
+    "cpfPseudo": "6c74f4e5a3708003",
+    "nome": "Carla Mendes",
+    "id": 3,
+    "email": "carla@gmail.com"
+  },
+  {
+    "telefone": "(31) 96666-3333",
+    "ativo": true,
+    "endereco": "Travessa da Matriz, 3",
+    "cpfPseudo": "8d9436b4e3de0529",
+    "nome": "Pedro Alves",
+    "id": 4,
+    "email": "pedro@gmail.com"
+  },
+  {
+    "telefone": "(38) 95555-4444",
+    "ativo": true,
+    "endereco": "Rua Direita, 18",
+    "cpfPseudo": "84c830620941cc50",
+    "nome": "Lúcia Ferreira",
+    "id": 5,
+    "email": "lucia@gmail.com"
+  },
+  {
+    "telefone": "(11) 94444-5555",
+    "ativo": true,
+    "endereco": "Rua do Comércio, 7",
+    "cpfPseudo": "a5659e09069a646c",
+    "nome": "Rafael Costa",
+    "id": 6,
+    "email": "rafael@gmail.com"
+  },
+  {
+    "telefone": "(38) 93333-6666",
+    "ativo": true,
+    "endereco": "Largo do Rosário, 2",
+    "cpfPseudo": "47ed33098891ee2e",
+    "nome": "Juliana Martins",
+    "id": 7,
+    "email": "juliana@gmail.com"
+  },
+  {
+    "telefone": "(31) 92222-7777",
+    "ativo": true,
+    "endereco": "Rua da Cachoeira, 25",
+    "cpfPseudo": "de031d98ec94729d",
+    "nome": "Thiago Ribeiro",
+    "id": 8,
+    "email": "thiago@gmail.com"
+  },
+  {
+    "telefone": "(38) 91111-8888",
+    "ativo": true,
+    "endereco": "Rua São Francisco, 9",
+    "cpfPseudo": "9c2d9ebf468f6d55",
+    "nome": "Mariana Gomes",
+    "id": 9,
+    "email": "mariana@gmail.com"
+  },
+  {
+    "telefone": "(38) 90000-9999",
+    "ativo": false,
+    "endereco": "Rua Macau de Baixo, 14",
+    "cpfPseudo": "fbe0cd65fca6c2ca",
+    "nome": "Lucas Pereira",
+    "id": 10,
+    "email": "lucas@gmail.com"
+  },
+  {
+    "telefone": "38998456703",
+    "ativo": false,
+    "endereco": "Couto",
+    "cpfPseudo": "5c0d33da0030d8c6",
+    "nome": "Diego Lima",
+    "id": 11,
+    "email": "diego@teste"
+  },
+  {
+    "telefone": "38998236543",
+    "ativo": true,
+    "endereco": "Diamantina, MG",
+    "cpfPseudo": "e0df18bf69a71552",
+    "nome": "Luiz Ricardo",
+    "id": 12,
+    "email": "luiz@gmail.com"
+  }
+]

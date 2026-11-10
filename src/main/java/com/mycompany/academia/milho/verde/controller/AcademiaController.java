@@ -30,40 +30,49 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import org.json.JSONException;
+import com.mycompany.academia.milho.verde.dao.ClienteDAOJson;
+import java.nio.file.Path;
 
 /**
  * Controlador da Academia Milho Verde (camada Controller do MVC).
  *
- * <p>Faz a ligação entre a {@link ConsoleView}, que lê e mostra, e o
- * {@link Sistema}, que guarda as regras. Recebe a opção escolhida na
- * View, chama o Sistema e devolve à View o resultado ou a mensagem de
- * erro. Não tem regra de negócio: toda validação está no Model, e os
- * erros chegam aqui como {@link IllegalArgumentException} ou
- * {@link IllegalStateException}.</p>
+ * <p>
+ * Faz a ligação entre a {@link ConsoleView}, que lê e mostra, e o
+ * {@link Sistema}, que guarda as regras. Recebe a opção escolhida na View,
+ * chama o Sistema e devolve à View o resultado ou a mensagem de erro. Não tem
+ * regra de negócio: toda validação está no Model, e os erros chegam aqui como
+ * {@link IllegalArgumentException} ou {@link IllegalStateException}.</p>
  *
- * <p>Os dados são carregados do JSON ao iniciar e gravados depois de
- * cada operação, para que uma falha não faça perder o que já foi
- * feito.</p>
+ * <p>
+ * Os dados são carregados do JSON ao iniciar e gravados depois de cada
+ * operação, para que uma falha não faça perder o que já foi feito.</p>
  *
  * @author Aline Ferreira
  */
 public class AcademiaController {
 
-    /** Sistema que guarda os dados e as regras da academia. */
+    /**
+     * Sistema que guarda os dados e as regras da academia.
+     */
     private Sistema sistema;
 
-    /** View que lê do teclado e mostra na tela. */
+    /**
+     * View que lê do teclado e mostra na tela.
+     */
     private ConsoleView view;
 
-    /** Repositório que grava e lê o arquivo JSON. */
+    /**
+     * Repositório que grava e lê o arquivo JSON.
+     */
     private RepositorioJson repositorio;
 
     /**
-     * Construtor padrão: cria o sistema, a view e o repositório
-     * padrão ({@code academia.json}).
+     * Construtor padrão: cria o sistema, a view e o repositório padrão
+     * ({@code academia.json}).
      */
     public AcademiaController() {
-        this(new Sistema(), new ConsoleView(), new RepositorioJson());
+        this(new Sistema(new ClienteDAOJson(Path.of("clientes.json"))),
+                new ConsoleView(), new RepositorioJson());
     }
 
     /**
@@ -75,7 +84,7 @@ public class AcademiaController {
      * @throws IllegalArgumentException se algum parâmetro for nulo
      */
     public AcademiaController(Sistema novoSistema, ConsoleView novaView,
-                              RepositorioJson novoRepositorio) {
+            RepositorioJson novoRepositorio) {
         if (novoSistema == null || novaView == null
                 || novoRepositorio == null) {
             throw new IllegalArgumentException(
@@ -86,12 +95,13 @@ public class AcademiaController {
         this.repositorio = novoRepositorio;
     }
 
-        /**
-     * Executa o programa: carrega os dados, faz o primeiro acesso se
-     * for preciso e mostra a tela inicial até o usuário sair.
+    /**
+     * Executa o programa: carrega os dados, faz o primeiro acesso se for
+     * preciso e mostra a tela inicial até o usuário sair.
      *
-     * <p>A tela inicial tem duas entradas: a dos funcionários, com
-     * login, e o terminal da catraca externa, que não faz login.</p>
+     * <p>
+     * A tela inicial tem duas entradas: a dos funcionários, com login, e o
+     * terminal da catraca externa, que não faz login.</p>
      */
     public void iniciar() {
         view.mostrarMensagem("===== Academia Milho Verde =====");
@@ -100,7 +110,7 @@ public class AcademiaController {
             prepararPrimeiroAcesso();
             int opcao = -1;
             while (opcao != 0) {
-                opcao = view.mostrarMenu("Tela inicial", new String[] {
+                opcao = view.mostrarMenu("Tela inicial", new String[]{
                     "Entrar (funcionário)",
                     "Terminal da catraca (simula o equipamento)"});
                 if (opcao == 1) {
@@ -118,6 +128,7 @@ public class AcademiaController {
         }
         view.mostrarMensagem("Até logo!");
     }
+
     /**
      * Mostra o menu principal uma vez e executa a opção escolhida.
      */
@@ -126,11 +137,11 @@ public class AcademiaController {
         boolean financeiro = usuario.podeAcessarFinanceiro();
         String[] opcoes;
         if (financeiro) {
-            opcoes = new String[] {"Clientes", "Funcionários",
+            opcoes = new String[]{"Clientes", "Funcionários",
                 "Agenda e agendamentos", "Lojinha e lanchonete",
                 "Catraca", "Relatórios de vendas", "Financeiro"};
         } else {
-            opcoes = new String[] {"Clientes", "Funcionários",
+            opcoes = new String[]{"Clientes", "Funcionários",
                 "Agenda e agendamentos", "Lojinha e lanchonete",
                 "Catraca", "Relatórios de vendas"};
         }
@@ -167,7 +178,6 @@ public class AcademiaController {
     }
 
     // ----------------------------------------------------- dados e acesso
-
     /**
      * Carrega os dados do arquivo JSON, se ele existir.
      */
@@ -175,7 +185,7 @@ public class AcademiaController {
         try {
             sistema.carregar(repositorio);
         } catch (IOException | JSONException | IllegalArgumentException
-                 | IllegalStateException erro) {
+                | IllegalStateException erro) {
             view.mostrarErro("Não foi possível carregar " + repositorio.getArquivo()
                     + ": " + erro.getMessage()
                     + ". O sistema começa vazio.");
@@ -189,7 +199,7 @@ public class AcademiaController {
         try {
             sistema.salvar(repositorio);
         } catch (IOException | IllegalArgumentException
-                 | IllegalStateException erro) {
+                | IllegalStateException erro) {
             view.mostrarErro("Não foi possível salvar os dados: "
                     + erro.getMessage());
         }
@@ -230,13 +240,12 @@ public class AcademiaController {
             } else {
                 view.mostrarErro("E-mail ou senha incorretos.");
                 tentar = view.mostrarMenu("Tentar de novo?",
-                        new String[] {"Sim"}) == 1;
+                        new String[]{"Sim"}) == 1;
             }
         }
     }
 
     // ------------------------------------------------------------ clientes
-
     /**
      * Menu de clientes (cadastro, busca, listagem e conta).
      */
@@ -244,7 +253,7 @@ public class AcademiaController {
         GestaoClientes gestao = sistema.getGestaoClientes();
         int opcao = -1;
         while (opcao != 0) {
-            opcao = view.mostrarMenu("Clientes", new String[] {
+            opcao = view.mostrarMenu("Clientes", new String[]{
                 "Cadastrar", "Editar", "Remover (desativar)",
                 "Buscar por ID", "Listar", "Emitir conta", "Buscar por nome", "Reativar"});
             try {
@@ -327,7 +336,6 @@ public class AcademiaController {
     }
 
     // ------------------------------------------------------- funcionários
-
     /**
      * Menu de funcionários (colaboradores e administradores).
      */
@@ -335,7 +343,7 @@ public class AcademiaController {
         GestaoFuncionarios gestao = sistema.getGestaoFuncionarios();
         int opcao = -1;
         while (opcao != 0) {
-            opcao = view.mostrarMenu("Funcionários", new String[] {
+            opcao = view.mostrarMenu("Funcionários", new String[]{
                 "Cadastrar colaborador", "Cadastrar administrador",
                 "Editar", "Remover",
                 "Alterar senha de administrador", "Listar"});
@@ -396,7 +404,6 @@ public class AcademiaController {
     }
 
     // ------------------------------------------------------------- agenda
-
     /**
      * Menu da agenda: aulas, vagas e agendamentos.
      */
@@ -404,7 +411,7 @@ public class AcademiaController {
         GestaoAgendamentos gestao = sistema.getGestaoAgendamentos();
         int opcao = -1;
         while (opcao != 0) {
-            opcao = view.mostrarMenu("Agenda e agendamentos", new String[] {
+            opcao = view.mostrarMenu("Agenda e agendamentos", new String[]{
                 "Cadastrar aula", "Remover aula", "Listar aulas",
                 "Consultar agenda semanal", "Verificar vagas de uma aula",
                 "Agendar cliente", "Confirmar agendamento",
@@ -454,7 +461,7 @@ public class AcademiaController {
                         break;
                     case 9:
                         int ordem = view.mostrarMenu("Ordenar por",
-                                new String[] {"Data", "Valor"});
+                                new String[]{"Data", "Valor"});
                         String criterio = (ordem == 2)
                                 ? ComparadorAgendamento.VALOR
                                 : ComparadorAgendamento.DATA;
@@ -486,7 +493,7 @@ public class AcademiaController {
         }
         List<Integer> ids = view.lerInteiros("IDs das aulas, separados por vírgula");
         int tipoEscolhido = view.mostrarMenu("Tipo de cobrança",
-                new String[] {"Diária", "Mensalidade"});
+                new String[]{"Diária", "Mensalidade"});
         String tipo = (tipoEscolhido == 2) ? Agendamento.MENSALIDADE
                 : Agendamento.DIARIA;
         double preco = view.lerDecimal("Preço em reais");
@@ -510,7 +517,6 @@ public class AcademiaController {
     }
 
     // --------------------------------------------------------------- loja
-
     /**
      * Menu da lojinha e da lanchonete: produtos, estoque e vendas.
      */
@@ -518,7 +524,7 @@ public class AcademiaController {
         GestaoVendas gestao = sistema.getGestaoVendas();
         int opcao = -1;
         while (opcao != 0) {
-            opcao = view.mostrarMenu("Lojinha e lanchonete", new String[] {
+            opcao = view.mostrarMenu("Lojinha e lanchonete", new String[]{
                 "Cadastrar produto", "Remover produto", "Listar produtos",
                 "Buscar produto por nome", "Repor estoque",
                 "Registrar venda de produtos"});
@@ -526,7 +532,7 @@ public class AcademiaController {
                 switch (opcao) {
                     case 1:
                         int tipo = view.mostrarMenu("Categoria",
-                                new String[] {"Lojinha", "Lanchonete"});
+                                new String[]{"Lojinha", "Lanchonete"});
                         String categoria = (tipo == 2) ? Produto.LANCHONETE
                                 : Produto.LOJA;
                         Produto produto = gestao.cadastrarProduto(
@@ -591,15 +597,14 @@ public class AcademiaController {
         view.imprimirExtrato(venda.getExtrato());
     }
 
-       // ------------------------------------------------------------ catraca
-
+    // ------------------------------------------------------------ catraca
     /**
      * Terminal da catraca externa: simula o equipamento da entrada.
      *
-     * <p>Não pede login, porque quem usa é o cliente. Ele informa o ID
-     * (como se passasse o cartão) e o Sistema decide sozinho se é
-     * entrada ou saída. Cliente inexistente ou desativado tem o acesso
-     * negado.</p>
+     * <p>
+     * Não pede login, porque quem usa é o cliente. Ele informa o ID (como se
+     * passasse o cartão) e o Sistema decide sozinho se é entrada ou saída.
+     * Cliente inexistente ou desativado tem o acesso negado.</p>
      */
     private void terminalCatraca() {
         view.mostrarMensagem("--- Catraca: passe o cartão (digite o seu ID) ---");
@@ -624,13 +629,13 @@ public class AcademiaController {
     }
 
     /**
-     * Menu da catraca para os funcionários: só consulta. Entradas e
-     * saídas vêm do terminal da catraca, não do funcionário.
+     * Menu da catraca para os funcionários: só consulta. Entradas e saídas vêm
+     * do terminal da catraca, não do funcionário.
      */
     private void menuCatraca() {
         int opcao = -1;
         while (opcao != 0) {
-            opcao = view.mostrarMenu("Catraca (consultas)", new String[] {
+            opcao = view.mostrarMenu("Catraca (consultas)", new String[]{
                 "Quem está na academia", "Registros de um dia",
                 "Registros de um mês", "Registros de um ano",
                 "Registros de um cliente"});
@@ -673,7 +678,6 @@ public class AcademiaController {
     }
 
     // ---------------------------------------------------------- relatórios
-
     /**
      * Menu de relatórios de vendas (dia e mês).
      */
@@ -681,7 +685,7 @@ public class AcademiaController {
         GestaoVendas gestao = sistema.getGestaoVendas();
         int opcao = -1;
         while (opcao != 0) {
-            opcao = view.mostrarMenu("Relatórios de vendas", new String[] {
+            opcao = view.mostrarMenu("Relatórios de vendas", new String[]{
                 "Vendas de um dia", "Vendas de um mês"});
             try {
                 switch (opcao) {
@@ -707,22 +711,21 @@ public class AcademiaController {
     }
 
     // ---------------------------------------------------------- financeiro
-
     /**
-     * Menu financeiro: despesas e balanço mensal. Só o administrador
-     * chega aqui; o Sistema recusa os demais.
+     * Menu financeiro: despesas e balanço mensal. Só o administrador chega
+     * aqui; o Sistema recusa os demais.
      */
     private void menuFinanceiro() {
         GestaoFinanceiro gestao = sistema.getGestaoFinanceiro();
         int opcao = -1;
         while (opcao != 0) {
-            opcao = view.mostrarMenu("Financeiro", new String[] {
+            opcao = view.mostrarMenu("Financeiro", new String[]{
                 "Cadastrar despesa", "Remover despesa", "Listar despesas",
                 "Balanço mensal"});
             try {
                 switch (opcao) {
                     case 1:
-                        int tipo = view.mostrarMenu("Categoria", new String[] {
+                        int tipo = view.mostrarMenu("Categoria", new String[]{
                             "Limpeza", "Funcionários", "Material", "Outros"});
                         Despesa despesa = gestao.cadastrarDespesa(
                                 view.lerTexto("Descrição"),

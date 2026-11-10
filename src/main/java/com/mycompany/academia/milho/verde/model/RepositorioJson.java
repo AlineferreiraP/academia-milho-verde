@@ -23,16 +23,17 @@ import org.json.JSONObject;
 /**
  * Salva e recupera os dados da academia em um arquivo JSON (padrão DAO).
  *
- * <p>Pertence à camada Model da organização MVC. Usa a biblioteca
- * pronta {@code org.json}, conforme o item 14 da Questão 2, para
- * converter os objetos Java em texto JSON e vice-versa.</p>
+ * <p>
+ * Pertence à camada Model da organização MVC. Usa a biblioteca pronta
+ * {@code org.json}, conforme o item 14 da Questão 2, para converter os objetos
+ * Java em texto JSON e vice-versa.</p>
  *
- * <p>O arquivo tem um objeto principal com uma lista para cada tipo de
- * cadastro: {@code clientes}, {@code funcionarios}, {@code aulas},
- * {@code agendamentos}, {@code produtos} (o estoque), {@code vendas},
- * {@code relatorios}, {@code despesas} e {@code registrosCatraca}.
- * Referências a outros objetos são gravadas pelo ID e trocadas pelo
- * objeto já carregado na leitura.</p>
+ * <p>
+ * O arquivo tem um objeto principal com uma lista para cada tipo de cadastro:
+ * {@code clientes}, {@code funcionarios}, {@code aulas}, {@code agendamentos},
+ * {@code produtos} (o estoque), {@code vendas}, {@code relatorios},
+ * {@code despesas} e {@code registrosCatraca}. Referências a outros objetos são
+ * gravadas pelo ID e trocadas pelo objeto já carregado na leitura.</p>
  *
  * <pre>
  * {
@@ -47,58 +48,82 @@ import org.json.JSONObject;
  * }
  * </pre>
  *
- * <p><b>Por que org.json e não Gson:</b> a org.json converte campo
- * por campo, do jeito que escrevemos nos conversores. Assim, só vai
- * para o arquivo o que decidimos gravar (o CPF original nunca é
- * gravado) e, na leitura, cada objeto é criado pelo construtor com
- * parâmetros, que valida os dados. A Gson converte automaticamente,
- * mas cria os objetos sem chamar o construtor e precisaria de
- * configuração extra para datas ({@code LocalDate}) e para objetos
- * que apontam um para o outro, como {@code Cliente} e {@code Extrato}.</p>
+ * <p>
+ * <b>Por que org.json e não Gson:</b> a org.json converte campo por campo, do
+ * jeito que escrevemos nos conversores. Assim, só vai para o arquivo o que
+ * decidimos gravar (o CPF original nunca é gravado) e, na leitura, cada objeto
+ * é criado pelo construtor com parâmetros, que valida os dados. A Gson converte
+ * automaticamente, mas cria os objetos sem chamar o construtor e precisaria de
+ * configuração extra para datas ({@code LocalDate}) e para objetos que apontam
+ * um para o outro, como {@code Cliente} e {@code Extrato}.</p>
  *
  * @author Aline Ferreira
  */
 public class RepositorioJson {
 
-    /** Nome da lista de clientes dentro do arquivo JSON. */
+    /**
+     * Nome da lista de clientes dentro do arquivo JSON.
+     */
     private static final String CHAVE_CLIENTES = "clientes";
 
-    /** Nome da lista de funcionários dentro do arquivo JSON. */
+    /**
+     * Nome da lista de funcionários dentro do arquivo JSON.
+     */
     private static final String CHAVE_FUNCIONARIOS = "funcionarios";
 
-    /** Nome da lista de aulas dentro do arquivo JSON. */
+    /**
+     * Nome da lista de aulas dentro do arquivo JSON.
+     */
     private static final String CHAVE_AULAS = "aulas";
 
-    /** Nome da lista de agendamentos dentro do arquivo JSON. */
+    /**
+     * Nome da lista de agendamentos dentro do arquivo JSON.
+     */
     private static final String CHAVE_AGENDAMENTOS = "agendamentos";
 
-    /** Nome da lista de produtos (estoque) dentro do arquivo JSON. */
+    /**
+     * Nome da lista de produtos (estoque) dentro do arquivo JSON.
+     */
     private static final String CHAVE_PRODUTOS = "produtos";
 
-    /** Nome da lista de vendas dentro do arquivo JSON. */
+    /**
+     * Nome da lista de vendas dentro do arquivo JSON.
+     */
     private static final String CHAVE_VENDAS = "vendas";
 
-    /** Nome da lista de relatórios de vendas dentro do arquivo JSON. */
+    /**
+     * Nome da lista de relatórios de vendas dentro do arquivo JSON.
+     */
     private static final String CHAVE_RELATORIOS = "relatorios";
 
-    /** Nome da lista de despesas dentro do arquivo JSON. */
+    /**
+     * Nome da lista de despesas dentro do arquivo JSON.
+     */
     private static final String CHAVE_DESPESAS = "despesas";
 
-    /** Nome da lista de registros da catraca dentro do arquivo JSON. */
+    /**
+     * Nome da lista de registros da catraca dentro do arquivo JSON.
+     */
     private static final String CHAVE_REGISTROS = "registrosCatraca";
 
-    /** Valor do campo "perfil" para administradores. */
+    /**
+     * Valor do campo "perfil" para administradores.
+     */
     private static final String PERFIL_ADMINISTRADOR = "ADMINISTRADOR";
 
-    /** Valor do campo "perfil" para colaboradores. */
+    /**
+     * Valor do campo "perfil" para colaboradores.
+     */
     private static final String PERFIL_COLABORADOR = "COLABORADOR";
 
-    /** Caminho do arquivo JSON onde os dados são gravados. */
+    /**
+     * Caminho do arquivo JSON onde os dados são gravados.
+     */
     private final Path arquivo;
 
     /**
-     * Construtor padrão: usa o arquivo {@code academia.json} na pasta
-     * em que o programa é executado.
+     * Construtor padrão: usa o arquivo {@code academia.json} na pasta em que o
+     * programa é executado.
      */
     public RepositorioJson() {
         // this(...) chama o outro construtor desta mesma classe,
@@ -132,9 +157,10 @@ public class RepositorioJson {
     /**
      * Grava todos os dados no arquivo JSON.
      *
-     * <p>Todos os objetos são convertidos antes da gravação. Se um
-     * deles estiver incompleto, nada é gravado e o arquivo anterior
-     * permanece como estava.</p>
+     * <p>
+     * Todos os objetos são convertidos antes da gravação. Se um deles estiver
+     * incompleto, nada é gravado e o arquivo anterior permanece como
+     * estava.</p>
      *
      * @param clientes gestão de clientes
      * @param funcionarios gestão de funcionários
@@ -146,11 +172,11 @@ public class RepositorioJson {
      * @throws IllegalArgumentException se algum cadastro estiver incompleto
      */
     public void salvar(GestaoClientes clientes, GestaoFuncionarios funcionarios,
-                       GestaoAgendamentos agendamentos, GestaoVendas vendas,
-                       GestaoFinanceiro financeiro, Catraca catraca)
+            GestaoAgendamentos agendamentos, GestaoVendas vendas,
+            GestaoFinanceiro financeiro, Catraca catraca)
             throws IOException {
         JSONObject raiz = new JSONObject();
-        raiz.put(CHAVE_CLIENTES, clientesParaJson(clientes.getClientes()));
+
         raiz.put(CHAVE_FUNCIONARIOS,
                 funcionariosParaJson(funcionarios.getFuncionarios()));
 
@@ -206,9 +232,9 @@ public class RepositorioJson {
     /**
      * Lê o arquivo JSON e entrega os dados às gestões.
      *
-     * <p>Primeiro converte tudo em objetos; só se não houver erro as
-     * gestões são atualizadas. Se o arquivo não existir (primeiro uso),
-     * nada muda.</p>
+     * <p>
+     * Primeiro converte tudo em objetos; só se não houver erro as gestões são
+     * atualizadas. Se o arquivo não existir (primeiro uso), nada muda.</p>
      *
      * @param clientes gestão de clientes a preencher
      * @param funcionarios gestão de funcionários a preencher
@@ -217,26 +243,23 @@ public class RepositorioJson {
      * @param financeiro gestão financeira a preencher
      * @param catraca catraca a preencher
      * @throws IOException se não for possível ler o arquivo
-     * @throws JSONException se o conteúdo não for um JSON válido ou
-     *         faltar algum campo obrigatório
+     * @throws JSONException se o conteúdo não for um JSON válido ou faltar
+     * algum campo obrigatório
      */
     public void carregar(GestaoClientes clientes, GestaoFuncionarios funcionarios,
-                         GestaoAgendamentos agendamentos, GestaoVendas vendas,
-                         GestaoFinanceiro financeiro, Catraca catraca)
+            GestaoAgendamentos agendamentos, GestaoVendas vendas,
+            GestaoFinanceiro financeiro, Catraca catraca)
             throws IOException {
         if (Files.notExists(arquivo)) {
             return;
         }
         JSONObject raiz = new JSONObject(lerTexto());
 
-        List<Cliente> listaClientes = new ArrayList<>();
-        JSONArray json = lista(raiz, CHAVE_CLIENTES);
-        for (int i = 0; i < json.length(); i++) {
-            listaClientes.add(jsonParaCliente(json.getJSONObject(i)));
-        }
+        // Os clientes vêm do DAO, já carregados.
+        List<Cliente> listaClientes = clientes.getClientes();
 
         List<Funcionario> listaFuncionarios = new ArrayList<>();
-        json = lista(raiz, CHAVE_FUNCIONARIOS);
+        JSONArray json = lista(raiz, CHAVE_FUNCIONARIOS);
         for (int i = 0; i < json.length(); i++) {
             listaFuncionarios.add(jsonParaFuncionario(json.getJSONObject(i)));
         }
@@ -286,7 +309,7 @@ public class RepositorioJson {
         }
 
         // Tudo convertido sem erro: agora as gestões são atualizadas.
-        clientes.carregar(listaClientes);
+ 
         funcionarios.carregar(listaFuncionarios);
         agendamentos.carregar(aulas, reservas);
         vendas.carregar(produtos, listaVendas, relatorios);
@@ -311,10 +334,11 @@ public class RepositorioJson {
     /**
      * Converte um cliente em objeto JSON.
      *
-     * <p>Grava apenas o CPF pseudonimizado; o número original
-     * nunca chega ao arquivo. Recusa clientes incompletos: se fossem
-     * gravados, o construtor com parâmetros os rejeitaria na leitura
-     * e o arquivo inteiro deixaria de abrir.</p>
+     * <p>
+     * Grava apenas o CPF pseudonimizado; o número original nunca chega ao
+     * arquivo. Recusa clientes incompletos: se fossem gravados, o construtor
+     * com parâmetros os rejeitaria na leitura e o arquivo inteiro deixaria de
+     * abrir.</p>
      *
      * @param cliente cliente a converter
      * @return objeto JSON com os dados do cliente
@@ -357,10 +381,10 @@ public class RepositorioJson {
     /**
      * Converte um funcionário em objeto JSON.
      *
-     * <p>O campo {@code perfil} guarda se é colaborador ou
-     * administrador, para recriar o objeto da subclasse certa na
-     * leitura. A senha é gravada como texto, porque criptografia está
-     * fora do escopo da disciplina.</p>
+     * <p>
+     * O campo {@code perfil} guarda se é colaborador ou administrador, para
+     * recriar o objeto da subclasse certa na leitura. A senha é gravada como
+     * texto, porque criptografia está fora do escopo da disciplina.</p>
      *
      * @param funcionario funcionário a converter
      * @return objeto JSON com os dados do funcionário
@@ -388,8 +412,9 @@ public class RepositorioJson {
     /**
      * Confere se a pessoa tem ID, nome e e-mail preenchidos.
      *
-     * <p>Recebe {@link Pessoa}, então serve tanto para clientes quanto
-     * para funcionários.</p>
+     * <p>
+     * Recebe {@link Pessoa}, então serve tanto para clientes quanto para
+     * funcionários.</p>
      *
      * @param pessoa cliente ou funcionário a conferir
      * @throws IllegalArgumentException se faltar algum desses dados
@@ -407,9 +432,9 @@ public class RepositorioJson {
     /**
      * Reconstrói um cliente a partir de um objeto JSON.
      *
-     * <p>Usa o construtor com parâmetros, que valida os dados.
-     * Se o cliente estava desativado, a situação é restaurada
-     * com {@link Pessoa#desativar()}.</p>
+     * <p>
+     * Usa o construtor com parâmetros, que valida os dados. Se o cliente estava
+     * desativado, a situação é restaurada com {@link Pessoa#desativar()}.</p>
      *
      * @param json objeto JSON de um cliente
      * @return o cliente reconstruído
@@ -434,7 +459,8 @@ public class RepositorioJson {
     /**
      * Reconstrói um funcionário a partir de um objeto JSON.
      *
-     * <p>O campo {@code perfil} decide qual subclasse é criada:
+     * <p>
+     * O campo {@code perfil} decide qual subclasse é criada:
      * {@link Administrador} ou {@link Colaborador}. Os dois passam pelo
      * construtor com parâmetros, que valida os dados.</p>
      *
@@ -460,7 +486,7 @@ public class RepositorioJson {
         }
         return funcionario;
     }
-    
+
     /**
      * Devolve uma das listas do objeto principal.
      *
@@ -476,7 +502,6 @@ public class RepositorioJson {
     }
 
     // ----------------------------------------------- aulas e agendamentos
-
     /**
      * Converte uma aula em objeto JSON.
      *
@@ -514,8 +539,9 @@ public class RepositorioJson {
     /**
      * Converte um agendamento em objeto JSON.
      *
-     * <p>As aulas vão por inteiro dentro do agendamento, porque uma
-     * aula já removida da agenda ainda faz parte de reservas antigas.</p>
+     * <p>
+     * As aulas vão por inteiro dentro do agendamento, porque uma aula já
+     * removida da agenda ainda faz parte de reservas antigas.</p>
      *
      * @param agendamento agendamento a converter
      * @return objeto JSON com os dados do agendamento
@@ -547,8 +573,8 @@ public class RepositorioJson {
      * @throws JSONException se faltar campo ou o cliente não existir
      */
     private Agendamento jsonParaAgendamento(JSONObject json,
-                                            List<Cliente> clientes,
-                                            List<Aula> aulasDasAgendas) {
+            List<Cliente> clientes,
+            List<Aula> aulasDasAgendas) {
         Cliente cliente = acharCliente(clientes, json.getInt("idCliente"));
         List<Aula> aulas = new ArrayList<>();
         JSONArray jsonAulas = json.getJSONArray("aulas");
@@ -571,7 +597,6 @@ public class RepositorioJson {
     }
 
     // ------------------------------------------------ produtos e vendas
-
     /**
      * Converte um produto em objeto JSON.
      *
@@ -604,8 +629,9 @@ public class RepositorioJson {
     /**
      * Converte uma venda em objeto JSON.
      *
-     * <p>Cada item guarda os dados do produto da época, porque o
-     * produto pode ter sido removido do estoque depois.</p>
+     * <p>
+     * Cada item guarda os dados do produto da época, porque o produto pode ter
+     * sido removido do estoque depois.</p>
      *
      * @param venda venda a converter
      * @return objeto JSON com os dados da venda
@@ -634,8 +660,8 @@ public class RepositorioJson {
     }
 
     /**
-     * Reconstrói uma venda a partir de um objeto JSON, inclusive o
-     * extrato, que volta a ser guardado no cliente.
+     * Reconstrói uma venda a partir de um objeto JSON, inclusive o extrato, que
+     * volta a ser guardado no cliente.
      *
      * @param json objeto JSON de uma venda
      * @param clientes clientes já carregados
@@ -644,7 +670,7 @@ public class RepositorioJson {
      * @throws JSONException se faltar campo ou o cliente não existir
      */
     private Venda jsonParaVenda(JSONObject json, List<Cliente> clientes,
-                                List<Produto> produtos) {
+            List<Produto> produtos) {
         Cliente cliente = acharCliente(clientes, json.getInt("idCliente"));
         Venda venda = new Venda(json.getInt("id"), cliente,
                 json.getString("tipo"),
@@ -707,7 +733,7 @@ public class RepositorioJson {
      * @throws JSONException se faltar campo ou uma venda não existir
      */
     private RelatorioVendas jsonParaRelatorio(JSONObject json,
-                                              List<Venda> vendas) {
+            List<Venda> vendas) {
         List<Venda> doRelatorio = new ArrayList<>();
         JSONArray ids = json.getJSONArray("idsVendas");
         for (int i = 0; i < ids.length(); i++) {
@@ -728,7 +754,6 @@ public class RepositorioJson {
     }
 
     // ----------------------------------------------- despesas e catraca
-
     /**
      * Converte uma despesa em objeto JSON.
      *
@@ -782,7 +807,7 @@ public class RepositorioJson {
      * @throws JSONException se faltar campo ou o cliente não existir
      */
     private RegistroCatraca jsonParaRegistro(JSONObject json,
-                                             List<Cliente> clientes) {
+            List<Cliente> clientes) {
         return new RegistroCatraca(json.getInt("id"),
                 acharCliente(clientes, json.getInt("idCliente")),
                 json.getString("tipo"),
@@ -809,12 +834,14 @@ public class RepositorioJson {
     /**
      * Grava o texto no arquivo de forma segura.
      *
-     * <p>Primeiro escreve em um arquivo temporário e só depois o move
-     * para o lugar do arquivo definitivo. Se algo falhar no meio da
-     * gravação, o arquivo anterior continua intacto.</p>
+     * <p>
+     * Primeiro escreve em um arquivo temporário e só depois o move para o lugar
+     * do arquivo definitivo. Se algo falhar no meio da gravação, o arquivo
+     * anterior continua intacto.</p>
      *
-     * <p>O {@code try-with-resources} fecha o arquivo automaticamente,
-     * mesmo quando ocorre erro, liberando o recurso com segurança.</p>
+     * <p>
+     * O {@code try-with-resources} fecha o arquivo automaticamente, mesmo
+     * quando ocorre erro, liberando o recurso com segurança.</p>
      *
      * @param conteudo texto JSON a gravar
      * @throws IOException se não for possível gravar ou mover o arquivo
@@ -843,8 +870,9 @@ public class RepositorioJson {
     /**
      * Move o arquivo temporário para o lugar do arquivo definitivo.
      *
-     * <p>Tenta a troca atômica (tudo ou nada). Se o sistema de
-     * arquivos não suportar, faz a troca comum.</p>
+     * <p>
+     * Tenta a troca atômica (tudo ou nada). Se o sistema de arquivos não
+     * suportar, faz a troca comum.</p>
      *
      * @param temporario arquivo já gravado
      * @throws IOException se não for possível mover o arquivo

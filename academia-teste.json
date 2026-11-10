@@ -119,19 +119,19 @@
       "tipo": "ENTRADA",
       "idCliente": 1,
       "id": 1,
-      "dataHora": "2026-11-08T09:49:08.610113915"
+      "dataHora": "2026-11-08T10:45:02.124449326"
     },
     {
       "tipo": "ENTRADA",
       "idCliente": 2,
       "id": 2,
-      "dataHora": "2026-11-08T09:49:08.610113915"
+      "dataHora": "2026-11-08T10:45:02.124449326"
     },
     {
       "tipo": "SAIDA",
       "idCliente": 1,
       "id": 3,
-      "dataHora": "2026-11-08T10:49:08.610113915"
+      "dataHora": "2026-11-08T11:45:02.124449326"
     }
   ],
   "vendas": [
@@ -142,7 +142,7 @@
       "idCliente": 1,
       "valorTotal": 120,
       "id": 1,
-      "dataHora": "2026-11-08T09:49:08.594094568"
+      "dataHora": "2026-11-08T10:45:02.108383384"
     },
     {
       "tipo": "DIARIA",
@@ -151,7 +151,7 @@
       "idCliente": 2,
       "valorTotal": 40,
       "id": 2,
-      "dataHora": "2026-11-08T09:49:08.595898155"
+      "dataHora": "2026-11-08T10:45:02.110451712"
     },
     {
       "tipo": "PRODUTO",
@@ -175,7 +175,7 @@
       "idCliente": 1,
       "valorTotal": 33.5,
       "id": 3,
-      "dataHora": "2026-11-08T09:49:08.599895644"
+      "dataHora": "2026-11-08T10:45:02.114212345"
     }
   ],
   "funcionarios": [
@@ -194,35 +194,6 @@
       "id": 2,
       "email": "bia@academia.com",
       "perfil": "COLABORADOR"
-    }
-  ],
-  "clientes": [
-    {
-      "telefone": "(38) 99999-0000",
-      "ativo": true,
-      "endereco": "Rua das Flores, 10",
-      "cpfPseudo": "6604556811088d08",
-      "nome": "Ana Souza",
-      "id": 1,
-      "email": "ana@gmail.com"
-    },
-    {
-      "telefone": "(38) 98888-1111",
-      "ativo": true,
-      "endereco": "Av. Central, 50",
-      "cpfPseudo": "11fc2f60793c0a00",
-      "nome": "João Lima Filho",
-      "id": 2,
-      "email": "joao@gmail.com"
-    },
-    {
-      "telefone": "(38) 97777-2222",
-      "ativo": false,
-      "endereco": "Rua do Rosário, 42",
-      "cpfPseudo": "6c74f4e5a3708003",
-      "nome": "Carla Mendes",
-      "id": 3,
-      "email": "carla@gmail.com"
     }
   ],
   "despesas": [{

@@ -83,6 +83,8 @@ public class GestaoClientes {
         Cliente cliente = exigirCliente(id);
         cliente.atualizarCadastro(nome, endereco, telefone, email,
                 Sistema.pseudonimizarCpf(cpf));
+        // Grava a mudança no DAO (e, no JSON, no arquivo)
+        dao.atualizar(cliente);
     }
 
     /**
@@ -93,7 +95,9 @@ public class GestaoClientes {
      * @throws IllegalArgumentException se o cliente não existir
      */
     public void removerCliente(int id) {
-        exigirCliente(id).desativar();
+       Cliente cliente = exigirCliente(id);
+       cliente.desativar();
+       dao.atualizar(cliente);
     }
 
     /**
@@ -109,6 +113,7 @@ public class GestaoClientes {
             throw new IllegalStateException("O cliente já está ativo.");
         }
         cliente.ativar();
+        dao.atualizar(cliente);
     }
 
     /**
