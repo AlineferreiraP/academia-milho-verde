@@ -14,58 +14,48 @@ import java.util.List;
  *
  * @author Aline Ferreira
  */
-// Guarda os clientes só na memória; os dados somem quando o programa fecha.
-public class ClienteDAOMemoria implements ClienteDAO {
+public class ClienteDAOMemoria implements ClienteDAO {      // cumpre o contrato ClienteDAO; guarda só na memória
 
-    // Clientes guardados, ativos e desativados.
-    private final List<Cliente> clientes = new ArrayList<>();
+    private final List<Cliente> clientes = new ArrayList<>(); // fonte de dados: lista com ativos e desativados
+    private int proximoId = 1;                              // contador do próximo ID
 
-    // Identificador do próximo cliente.
-    private int proximoId = 1;
-
-    // Reserva e devolve um ID novo, avançando o contador.
     @Override
-    public int gerarId() {
-        return proximoId++;
+    public int gerarId() {                                  // reserva um ID novo
+        return proximoId++;                                 // devolve o valor atual e depois soma 1
     }
 
-    // Guarda o cliente e mantém o contador acima do maior ID, para não
-    // repetir IDs de clientes lidos de um arquivo.
     @Override
-    public void inserir(Cliente cliente) {
-        clientes.add(cliente);
-        if (cliente.getId() >= proximoId) {
-            proximoId = cliente.getId() + 1;
+    public void inserir(Cliente cliente) {                  // guarda um cliente novo
+        clientes.add(cliente);                              // coloca na lista
+        if (cliente.getId() >= proximoId) {                 // ID igual ou maior que o contador?
+            proximoId = cliente.getId() + 1;                // mantém o contador acima do maior ID
         }
     }
 
-    // Procura pelo ID; devolve null se não existir.
     @Override
-    public Cliente buscarPorId(int id) {
-        for (Cliente cliente : clientes) {
-            if (cliente.getId() == id) {
-                return cliente;
+    public Cliente buscarPorId(int id) {                    // procura pelo ID
+        for (Cliente cliente : clientes) {                  // percorre a lista
+            if (cliente.getId() == id) {                    // achou o ID pedido?
+                return cliente;                             // devolve o cliente
             }
         }
-        return null;
+        return null;                                        // não existe: devolve null
     }
 
-    // Devolve uma cópia da lista, para quem chama não mexer na lista interna.
     @Override
-    public List<Cliente> listar() {
-        return new ArrayList<>(clientes);
+    public List<Cliente> listar() {                         // todos os clientes
+        return new ArrayList<>(clientes);                   // cópia, para ninguém mexer na lista interna
     }
 
-    // Troca o cliente guardado que tem o mesmo ID.
     @Override
-    public void atualizar(Cliente cliente) {
-        for (int i = 0; i < clientes.size(); i++) {
-            if (clientes.get(i).getId() == cliente.getId()) {
-                clientes.set(i, cliente);
-                return;
+    public void atualizar(Cliente cliente) {                // grava as mudanças de um cliente já guardado
+        for (int i = 0; i < clientes.size(); i++) {         // percorre as posições da lista
+            if (clientes.get(i).getId() == cliente.getId()) { // achou o cliente de mesmo ID?
+                clientes.set(i, cliente);                   // troca o objeto guardado pelo recebido
+                return;                                     // terminou
             }
         }
-        throw new IllegalArgumentException(
+        throw new IllegalArgumentException(                 // não achou: avisa com erro
                 "Cliente " + cliente.getId() + " não encontrado.");
     }
 }

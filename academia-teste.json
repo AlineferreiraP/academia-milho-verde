@@ -10,13 +10,13 @@
           "instrutor": "Rafa",
           "codigoSala": 1,
           "id": 1,
-          "dataHora": "2026-12-08T09:00"
+          "dataHora": "2026-12-10T09:00"
         },
         {
           "instrutor": "Rafa",
           "codigoSala": 1,
           "id": 2,
-          "dataHora": "2026-12-08T10:00"
+          "dataHora": "2026-12-10T10:00"
         }
       ],
       "valorDevolvido": 60,
@@ -32,7 +32,7 @@
         "instrutor": "Marina",
         "codigoSala": 4,
         "id": 3,
-        "dataHora": "2026-12-08T09:00"
+        "dataHora": "2026-12-10T09:00"
       }],
       "valorDevolvido": 0,
       "id": 2,
@@ -47,7 +47,7 @@
         "instrutor": "Rafa",
         "codigoSala": 1,
         "id": 2,
-        "dataHora": "2026-12-08T10:00"
+        "dataHora": "2026-12-10T10:00"
       }],
       "valorDevolvido": 0,
       "id": 3,
@@ -62,7 +62,7 @@
         "instrutor": "Rafa",
         "codigoSala": 1,
         "id": 2,
-        "dataHora": "2026-12-08T10:00"
+        "dataHora": "2026-12-10T10:00"
       }],
       "valorDevolvido": 0,
       "id": 4,
@@ -77,7 +77,7 @@
         "instrutor": "Rafa",
         "codigoSala": 1,
         "id": 1,
-        "dataHora": "2026-12-08T09:00"
+        "dataHora": "2026-12-10T09:00"
       }],
       "valorDevolvido": 0,
       "id": 5,
@@ -105,13 +105,13 @@
       "instrutor": "Rafa",
       "codigoSala": 1,
       "id": 1,
-      "dataHora": "2026-12-08T09:00"
+      "dataHora": "2026-12-10T09:00"
     },
     {
       "instrutor": "Rafa",
       "codigoSala": 1,
       "id": 2,
-      "dataHora": "2026-12-08T10:00"
+      "dataHora": "2026-12-10T10:00"
     }
   ],
   "registrosCatraca": [
@@ -119,19 +119,19 @@
       "tipo": "ENTRADA",
       "idCliente": 1,
       "id": 1,
-      "dataHora": "2026-11-08T10:45:02.124449326"
+      "dataHora": "2026-11-10T23:01:23.044258784"
     },
     {
       "tipo": "ENTRADA",
       "idCliente": 2,
       "id": 2,
-      "dataHora": "2026-11-08T10:45:02.124449326"
+      "dataHora": "2026-11-10T23:01:23.044258784"
     },
     {
       "tipo": "SAIDA",
       "idCliente": 1,
       "id": 3,
-      "dataHora": "2026-11-08T11:45:02.124449326"
+      "dataHora": "2026-11-11T00:01:23.044258784"
     }
   ],
   "vendas": [
@@ -142,7 +142,7 @@
       "idCliente": 1,
       "valorTotal": 120,
       "id": 1,
-      "dataHora": "2026-11-08T10:45:02.108383384"
+      "dataHora": "2026-11-10T23:01:23.007942842"
     },
     {
       "tipo": "DIARIA",
@@ -151,7 +151,7 @@
       "idCliente": 2,
       "valorTotal": 40,
       "id": 2,
-      "dataHora": "2026-11-08T10:45:02.110451712"
+      "dataHora": "2026-11-10T23:01:23.010003875"
     },
     {
       "tipo": "PRODUTO",
@@ -175,7 +175,7 @@
       "idCliente": 1,
       "valorTotal": 33.5,
       "id": 3,
-      "dataHora": "2026-11-08T10:45:02.114212345"
+      "dataHora": "2026-11-10T23:01:23.018310523"
     }
   ],
   "funcionarios": [
@@ -197,7 +197,7 @@
     }
   ],
   "despesas": [{
-    "data": "2026-11-08",
+    "data": "2026-11-10",
     "categoria": "FUNCIONARIOS",
     "valor": 1800,
     "id": 2,
@@ -210,8 +210,8 @@
         2,
         3
       ],
-      "inicio": "2026-11-08",
-      "fim": "2026-11-08"
+      "inicio": "2026-11-10",
+      "fim": "2026-11-10"
     },
     {
       "idsVendas": [
