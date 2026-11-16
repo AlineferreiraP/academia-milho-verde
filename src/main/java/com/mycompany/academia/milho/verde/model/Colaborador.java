@@ -15,58 +15,25 @@ package com.mycompany.academia.milho.verde.model;
  *
  * @author Aline Ferreira
  */
-public class Colaborador extends Funcionario {
 
-    /**
-     * Construtor padrão: cria um colaborador em branco.
-     *
-     * <p>{@code super()} chama o construtor padrão do
-     * {@link Funcionario}.</p>
-     */
-    public Colaborador() {
-        super();
-    }
+public class Colaborador extends Funcionario { // Colaborador É UM Funcionario: herança
 
-    /**
-     * Construtor com parâmetros: cria um colaborador ativo.
-     *
-     * <p>{@code super(...)} repassa os dados ao {@link Funcionario},
-     * que valida o ID, o nome, o e-mail e a senha.</p>
-     *
-     * @param novoId identificador positivo do colaborador
-     * @param novoNome nome completo
-     * @param novoEmail e-mail usado no login
-     * @param novaSenha senha de acesso
-     * @throws IllegalArgumentException se o identificador não for
-     *         positivo ou se algum dado estiver nulo, vazio ou
-     *         contiver apenas espaços
-     */
-    public Colaborador(int novoId, String novoNome, String novoEmail,
-                       String novaSenha) {
-        super(novoId, novoNome, novoEmail, novaSenha);
-    }
+    public Colaborador() { // construtor sem parâmetros
+        super(); // chama o construtor sem parâmetros do Funcionario
+    } // fim do construtor sem parâmetros
 
-    /**
-     * Informa que o colaborador não acessa o financeiro.
-     *
-     * <p>Sobrescreve o método abstrato de {@link Funcionario}
-     * (polimorfismo): despesas e balanço mensal são exclusivos do
-     * administrador.</p>
-     *
-     * @return sempre {@code false}
-     */
-    @Override
-    public boolean podeAcessarFinanceiro() {
-        return false;   // colaborador não acessa despesas nem balanço
-    }
+    public Colaborador(int novoId, String novoNome, String novoEndereco,
+            String novoTelefone, String novoEmail, String novaSenha) { // construtor com parâmetros
+        super(novoId, novoNome, novoEndereco, novoTelefone, novoEmail, novaSenha); // repassa tudo ao Funcionario (item 4)
+    } // fim do construtor com parâmetros
 
-    /**
-     * Retorna uma descrição do colaborador, sem a senha.
-     *
-     * @return texto com o perfil e os dados do funcionário
-     */
-    @Override
-    public String toString() {
-        return "Colaborador[" + super.toString() + "]";
-    }
-}
+    @Override // redefine o método abstrato do Funcionario
+    public boolean podeAcessarFinanceiro() { // polimorfismo: cada subclasse responde do seu jeito
+        return false; // colaborador não acessa financeiro nem funcionários
+    } // fim de podeAcessarFinanceiro
+
+    @Override // sobrescreve o toString herdado
+    public String toString() { // item 3
+        return "Colaborador " + super.toString(); // acrescenta o perfil ao texto da Pessoa
+    } // fim de toString
+} // fim da classe Colaborador

@@ -2,274 +2,128 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
-package com.mycompany.academia.milho.verde.model;
+package com.mycompany.academia.milho.verde.model; // pacote do Model
 
-import java.time.DayOfWeek;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.List;
+import java.time.DayOfWeek; // dias da semana (MONDAY, SUNDAY...)
+import java.time.LocalDate; // data sem hora
+import java.time.LocalDateTime; // data com hora
+import java.time.temporal.TemporalAdjusters; // ajusta uma data, por exemplo para a segunda-feira da semana
+import java.util.ArrayList; // lista que cresce sozinha
+import java.util.List; // tipo da lista
 
-/**
- * Quadro de horários de uma sala em uma semana.
- *
- * <p>A grade é uma matriz {@code grade[horario][dia]}: 18 linhas (das
- * 5h às 22h, aulas de 1 hora, a última termina às 23h) e 6 colunas
- * (segunda a sábado). Célula vazia ({@code null}) é horário livre.</p>
- *
- * @author Aline Ferreira
- */
-public class AgendaSemanal {
+public class AgendaSemanal { // quadro de horários de UMA sala em UMA semana
 
-    /** Número de dias de funcionamento (segunda a sábado). */
-    public static final int DIAS = 6;
+    public static final int DIAS = 6; // colunas: segunda a sábado
+    public static final int HORARIOS = 18; // linhas: aulas das 5h às 22h (a última termina às 23h)
+    public static final int PRIMEIRA_HORA = 5; // horário da primeira aula do dia
 
-    /** Número de horários por dia (das 5h às 22h). */
-    public static final int HORARIOS = 18;
+    private final LocalDate inicioSemana; // a segunda-feira desta semana
+    private final Sala sala; // a sala desta agenda
+    private final Aula[][] grade; // matriz [horário][dia]; null quer dizer horário livre
 
-    /** Hora da primeira aula do dia. */
-    public static final int PRIMEIRA_HORA = 5;
+    public AgendaSemanal() { // construtor sem parâmetros
+        this.inicioSemana = null; // ainda sem semana
+        this.sala = null; // ainda sem sala
+        this.grade = new Aula[HORARIOS][DIAS]; // matriz vazia
+    } // fim do construtor sem parâmetros
 
-    /** Segunda-feira que abre a semana. */
-    private LocalDate inicioSemana;
+    public AgendaSemanal(LocalDate novoInicio, Sala novaSala) { // construtor com parâmetros
+        if (novoInicio == null || novaSala == null) { // precisa da semana e da sala
+            throw new IllegalArgumentException("Informe a semana e a sala da agenda."); // erro de argumento
+        } // fim do if
+        this.inicioSemana = novoInicio.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY)); // volta para a segunda-feira
+        this.sala = novaSala; // guarda a sala
+        this.grade = new Aula[HORARIOS][DIAS]; // matriz vazia: 18 horários x 6 dias
+    } // fim do construtor com parâmetros
 
-    /** Sala a que esta agenda pertence. */
-    private Sala sala;
+    public LocalDate getInicioSemana() { // getter da segunda-feira da semana
+        return inicioSemana; // devolve a data
+    } // fim de getInicioSemana
 
-    /** Matriz de aulas: linha é o horário, coluna é o dia. */
-    private Aula[][] grade;
+    public Sala getSala() { // getter da sala
+        return sala; // devolve a sala
+    } // fim de getSala
 
-    /**
-     * Construtor padrão: cria uma agenda vazia, sem sala e sem semana.
-     */
-    public AgendaSemanal() {
-        this.inicioSemana = null;
-        this.sala = null;
-        this.grade = new Aula[HORARIOS][DIAS];
-    }
+    public Aula getAula(int dia, int horario) { // aula de uma célula da matriz
+        if (dia < 0 || dia >= DIAS || horario < 0 || horario >= HORARIOS) { // fora da matriz?
+            throw new IllegalArgumentException("Dia ou horário fora da agenda."); // erro de argumento
+        } // fim do if
+        return grade[horario][dia]; // devolve a aula ou null
+    } // fim de getAula
 
-    /**
-     * Construtor com parâmetros.
-     *
-     * @param novoInicio segunda-feira da semana
-     * @param novaSala sala da agenda
-     * @throws IllegalArgumentException se algum dado for nulo ou se a
-     *         data não for uma segunda-feira
-     */
-    public AgendaSemanal(LocalDate novoInicio, Sala novaSala) {
-        if (novoInicio == null || novaSala == null) {
-            throw new IllegalArgumentException(
-                    "A semana e a sala são obrigatórias.");
-        }
-        if (novoInicio.getDayOfWeek() != DayOfWeek.MONDAY) {
-            throw new IllegalArgumentException(
-                    "A semana deve começar numa segunda-feira.");
-        }
-        this.inicioSemana = novoInicio;
-        this.sala = novaSala;
-        this.grade = new Aula[HORARIOS][DIAS];
-    }
+    public boolean estaLivre(int dia, int horario) { // o horário está vago?
+        return getAula(dia, horario) == null; // livre quando a célula está vazia
+    } // fim de estaLivre
 
-    /**
-     * Retorna a segunda-feira da semana.
-     *
-     * @return a data de início
-     */
-    public LocalDate getInicioSemana() {
-        return inicioSemana;
-    }
+    public void adicionarAula(Aula aula) { // coloca a aula na célula do seu dia e horário
+        if (aula == null) { // não aceita "nenhuma aula"
+            throw new IllegalArgumentException("Informe a aula."); // erro de argumento
+        } // fim do if
+        if (aula.getSala().getCodigo() != sala.getCodigo()) { // a aula é de outra sala?
+            throw new IllegalArgumentException("A aula não é desta sala."); // erro de argumento
+        } // fim do if
+        if (!contem(aula.getDataHora())) { // a aula é de outra semana?
+            throw new IllegalArgumentException("A aula não é desta semana."); // erro de argumento
+        } // fim do if
+        int dia = calcularDia(aula.getDataHora()); // coluna da matriz (já recusa domingo)
+        int horario = calcularHorario(aula.getDataHora()); // linha da matriz (já recusa horário fora)
+        if (!estaLivre(dia, horario)) { // a célula já tem aula?
+            throw new IllegalArgumentException("Já existe aula nesta sala neste horário."); // horário ocupado
+        } // fim do if
+        grade[horario][dia] = aula; // guarda a aula na célula
+    } // fim de adicionarAula
 
-    /**
-     * Retorna a sala da agenda.
-     *
-     * @return a sala
-     */
-    public Sala getSala() {
-        return sala;
-    }
+    public boolean removerAula(Aula aula) { // tira a aula da matriz
+        for (int h = 0; h < HORARIOS; h++) { // percorre as linhas (horários)
+            for (int d = 0; d < DIAS; d++) { // percorre as colunas (dias)
+                if (grade[h][d] != null && grade[h][d].getId() == aula.getId()) { // achou a aula?
+                    grade[h][d] = null; // libera o horário
+                    return true; // removida
+                } // fim do if
+            } // fim do for dos dias
+        } // fim do for dos horários
+        return false; // a aula não estava nesta agenda
+    } // fim de removerAula
 
-    /**
-     * Retorna a aula de uma célula da grade.
-     *
-     * @param dia 0 (segunda) a 5 (sábado)
-     * @param horario 0 (5h) a 17 (22h)
-     * @return a aula, ou {@code null} se o horário está livre
-     * @throws IllegalArgumentException se dia ou horário estiverem fora
-     *         da grade
-     */
-    public Aula getAula(int dia, int horario) {
-        if (dia < 0 || dia >= DIAS || horario < 0 || horario >= HORARIOS) {
-            throw new IllegalArgumentException(
-                    "Dia ou horário fora da grade.");
-        }
-        return grade[horario][dia];
-    }
+    public List<Aula> listarAulas() { // todas as aulas da semana
+        List<Aula> aulas = new ArrayList<>(); // resultado começa vazio
+        for (int d = 0; d < DIAS; d++) { // percorre os dias (segunda a sábado)
+            for (int h = 0; h < HORARIOS; h++) { // percorre os horários do dia
+                if (grade[h][d] != null) { // há aula nesta célula?
+                    aulas.add(grade[h][d]); // entra na lista, em ordem de dia e horário
+                } // fim do if
+            } // fim do for dos horários
+        } // fim do for dos dias
+        return aulas; // devolve as aulas
+    } // fim de listarAulas
 
-    /**
-     * Informa se um horário está livre.
-     *
-     * @param dia 0 (segunda) a 5 (sábado)
-     * @param horario 0 (5h) a 17 (22h)
-     * @return {@code true} se não há aula nessa célula
-     */
-    public boolean estaLivre(int dia, int horario) {
-        return getAula(dia, horario) == null;
-    }
+    public boolean contem(LocalDateTime dataHora) { // a data cai nesta semana?
+        LocalDate data = dataHora.toLocalDate(); // só o dia, sem a hora
+        return !data.isBefore(inicioSemana) && data.isBefore(inicioSemana.plusDays(7)); // de segunda até domingo
+    } // fim de contem
 
-    /**
-     * Coloca uma aula na célula do seu dia e horário.
-     *
-     * @param aula aula de uma hora cheia, desta sala e desta semana
-     * @throws IllegalArgumentException se a aula for nula, de outra sala,
-     *         de outra semana, de domingo, fora do horário de
-     *         funcionamento ou não começar em hora cheia
-     * @throws IllegalStateException se o horário já estiver ocupado
-     */
-    public void adicionarAula(Aula aula) {
-        if (aula == null) {
-            throw new IllegalArgumentException("A aula é obrigatória.");
-        }
-        if (aula.getSala() == null
-                || aula.getSala().getCodigo() != sala.getCodigo()) {
-            throw new IllegalArgumentException(
-                    "A aula pertence a outra sala.");
-        }
-        LocalDateTime quando = aula.getDataHora();
-        if (!contem(quando)) {
-            throw new IllegalArgumentException(
-                    "A aula não pertence a esta semana.");
-        }
-        if (quando.getMinute() != 0) {
-            throw new IllegalArgumentException(
-                    "As aulas começam em hora cheia.");
-        }
-        int dia = calcularDia(quando);
-        int horario = calcularHorario(quando);
-        if (grade[horario][dia] != null) {
-            throw new IllegalStateException("Esse horário já está ocupado.");
-        }
-        grade[horario][dia] = aula;
-    }
+    private int calcularDia(LocalDateTime dataHora) { // coluna: segunda = 0 ... sábado = 5
+        DayOfWeek diaSemana = dataHora.getDayOfWeek(); // dia da semana da data
+        if (diaSemana == DayOfWeek.SUNDAY) { // domingo?
+            throw new IllegalArgumentException("A academia não abre aos domingos."); // regra de funcionamento
+        } // fim do if
+        return diaSemana.getValue() - 1; // getValue: segunda = 1 ... sábado = 6
+    } // fim de calcularDia
 
-    /**
-     * Retira uma aula da grade.
-     *
-     * @param aula aula a retirar
-     * @return {@code true} se a aula estava na grade
-     */
-    public boolean removerAula(Aula aula) {
-        for (int dia = 0; dia < DIAS; dia++) {
-            for (int horario = 0; horario < HORARIOS; horario++) {
-                if (grade[horario][dia] != null && grade[horario][dia] == aula) {
-                    grade[horario][dia] = null;
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
+    private int calcularHorario(LocalDateTime dataHora) { // linha: 5h = 0 ... 22h = 17
+        if (dataHora.getMinute() != 0) { // aulas começam em hora cheia
+            throw new IllegalArgumentException("As aulas começam em hora cheia (ex.: 06:00)."); // erro de argumento
+        } // fim do if
+        int horario = dataHora.getHour() - PRIMEIRA_HORA; // 6h vira linha 1, por exemplo
+        if (horario < 0 || horario >= HORARIOS) { // antes das 5h ou depois das 22h?
+            throw new IllegalArgumentException("Fora do horário de funcionamento (aulas das 5h às 22h)."); // regra
+        } // fim do if
+        return horario; // linha da matriz
+    } // fim de calcularHorario
 
-    /**
-     * Lista as aulas da semana em ordem cronológica.
-     *
-     * @return lista nova com as aulas, de segunda a sábado
-     */
-    public List<Aula> listarAulas() {
-        List<Aula> aulas = new ArrayList<>();
-        for (int dia = 0; dia < DIAS; dia++) {
-            for (int horario = 0; horario < HORARIOS; horario++) {
-                if (grade[horario][dia] != null) {
-                    aulas.add(grade[horario][dia]);
-                }
-            }
-        }
-        return aulas;
-    }
-
-    /**
-     * Informa se uma data e hora cai nesta semana.
-     *
-     * @param dataHora data e hora a conferir
-     * @return {@code true} se está entre a segunda e o domingo da semana
-     */
-    public boolean contem(LocalDateTime dataHora) {
-        if (dataHora == null || inicioSemana == null) {
-            return false;
-        }
-        LocalDate data = dataHora.toLocalDate();
-        return !data.isBefore(inicioSemana)
-                && !data.isAfter(inicioSemana.plusDays(6));
-    }
-
-    /**
-     * Calcula a coluna da grade a partir da data.
-     *
-     * @param dataHora data e hora da aula
-     * @return 0 para segunda até 5 para sábado
-     * @throws IllegalArgumentException se for domingo
-     */
-    private int calcularDia(LocalDateTime dataHora) {
-        int dia = dataHora.getDayOfWeek().getValue() - 1;
-        if (dia >= DIAS) {
-            throw new IllegalArgumentException(
-                    "A academia não abre aos domingos.");
-        }
-        return dia;
-    }
-
-    /**
-     * Calcula a linha da grade a partir da hora.
-     *
-     * @param dataHora data e hora da aula
-     * @return 0 para 5h até 17 para 22h
-     * @throws IllegalArgumentException se a hora estiver fora do
-     *         funcionamento
-     */
-    private int calcularHorario(LocalDateTime dataHora) {
-        int horario = dataHora.getHour() - PRIMEIRA_HORA;
-        if (horario < 0 || horario >= HORARIOS) {
-            throw new IllegalArgumentException(
-                    "A academia funciona das 5h às 23h; a aula deve começar entre 5h e 22h.");
-        }
-        return horario;
-    }
-
-    /**
-     * Imprime a semana como tabela de horários.
-     *
-     * @return texto com uma linha por horário e uma coluna por dia
-     */
-    @Override
-    public String toString() {
-        if (sala == null || inicioSemana == null) {
-            return "Agenda em branco.";
-        }
-        DateTimeFormatter formato = DateTimeFormatter.ofPattern("dd/MM/yyyy");
-        String[] nomes = {"Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"};
-        StringBuilder texto = new StringBuilder();
-        texto.append("Sala ").append(sala.getCodigo()).append(" (")
-                .append(sala.getModalidade()).append(") - semana de ")
-                .append(inicioSemana.format(formato)).append('\n');
-        texto.append(String.format("%-6s", "Hora"));
-        for (int dia = 0; dia < DIAS; dia++) {
-            texto.append(String.format("| %-14s", nomes[dia] + " "
-                    + inicioSemana.plusDays(dia).getDayOfMonth()));
-        }
-        texto.append('\n');
-        for (int horario = 0; horario < HORARIOS; horario++) {
-            texto.append(String.format("%02dh   ", horario + PRIMEIRA_HORA));
-            for (int dia = 0; dia < DIAS; dia++) {
-                Aula aula = grade[horario][dia];
-                String celula = (aula == null) ? "-"
-                        : "#" + aula.getId() + " " + aula.getNomeInstrutor();
-                if (celula.length() > 14) {
-                    celula = celula.substring(0, 14);
-                }
-                texto.append(String.format("| %-14s", celula));
-            }
-            texto.append('\n');
-        }
-        return texto.toString();
-    }
-}
+    @Override // sobrescreve o toString herdado de Object
+    public String toString() { // texto que representa a agenda
+        return "Agenda da sala " + sala.getCodigo() + " (" + sala.getModalidade() + ") | semana de "
+                + inicioSemana + " | " + listarAulas().size() + " aula(s)"; // sala, semana e quantidade
+    } // fim de toString
+} // fim da classe AgendaSemanal

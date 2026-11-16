@@ -15,58 +15,25 @@ package com.mycompany.academia.milho.verde.model;
  *
  * @author Aline Ferreira Pena
  */
-public class Administrador extends Funcionario {
 
-    /**
-     * Construtor padrão: cria um administrador em branco.
-     *
-     * <p>{@code super()} chama o construtor padrão do
-     * {@link Funcionario}.</p>
-     */
-    public Administrador() {
-        super();
-    }
+public class Administrador extends Funcionario { // Administrador É UM Funcionario: herança
 
-    /**
-     * Construtor com parâmetros: cria um administrador ativo.
-     *
-     * <p>{@code super(...)} repassa os dados ao {@link Funcionario},
-     * que valida o ID, o nome, o e-mail e a senha.</p>
-     *
-     * @param novoId identificador positivo do administrador
-     * @param novoNome nome completo
-     * @param novoEmail e-mail usado no login
-     * @param novaSenha senha de acesso
-     * @throws IllegalArgumentException se o identificador não for
-     *         positivo ou se algum dado estiver nulo, vazio ou
-     *         contiver apenas espaços
-     */
-    public Administrador(int novoId, String novoNome, String novoEmail,
-                         String novaSenha) {
-        super(novoId, novoNome, novoEmail, novaSenha);
-    }
+    public Administrador() { // construtor sem parâmetros
+        super(); // chama o construtor sem parâmetros do Funcionario
+    } // fim do construtor sem parâmetros
 
-    /**
-     * Informa que o administrador acessa o financeiro.
-     *
-     * <p>Sobrescreve o método abstrato de {@link Funcionario}
-     * (polimorfismo): só o administrador gerencia as despesas e gera
-     * o balanço mensal.</p>
-     *
-     * @return sempre {@code true}
-     */
-    @Override
-    public boolean podeAcessarFinanceiro() {
-        return true;    // administrador acessa despesas e balanço
-    }
+    public Administrador(int novoId, String novoNome, String novoEndereco,
+            String novoTelefone, String novoEmail, String novaSenha) { // construtor com parâmetros
+        super(novoId, novoNome, novoEndereco, novoTelefone, novoEmail, novaSenha); // repassa tudo ao Funcionario (item 4)
+    } // fim do construtor com parâmetros
 
-    /**
-     * Retorna uma descrição do administrador, sem a senha.
-     *
-     * @return texto com o perfil e os dados do funcionário
-     */
-    @Override
-    public String toString() {
-        return "Administrador[" + super.toString() + "]";
-    }
-}
+    @Override // redefine o método abstrato do Funcionario
+    public boolean podeAcessarFinanceiro() { // polimorfismo: cada subclasse responde do seu jeito
+        return true; // administrador acessa financeiro e funcionários
+    } // fim de podeAcessarFinanceiro
+
+    @Override // sobrescreve o toString herdado
+    public String toString() { // item 3
+        return "Administrador " + super.toString(); // acrescenta o perfil ao texto da Pessoa
+    } // fim de toString
+} // fim da classe Administrador

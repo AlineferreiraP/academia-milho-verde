@@ -2,163 +2,161 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
-package com.mycompany.academia.milho.verde.dao;
+package com.mycompany.academia.milho.verde.dao; // pacote do DAO
 
-import com.mycompany.academia.milho.verde.model.Cliente;
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.AtomicMoveNotSupportedException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.StandardCopyOption;
-import java.util.List;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
+import com.mycompany.academia.milho.verde.model.Cliente; // classe guardada no arquivo
+import java.io.BufferedReader; // lê o arquivo linha por linha
+import java.io.BufferedWriter; // escreve no arquivo
+import java.io.IOException; // erro de leitura ou gravação de arquivo
+import java.nio.charset.StandardCharsets; // arquivo em UTF-8 (aceita acentos)
+import java.nio.file.AtomicMoveNotSupportedException; // erro se o sistema não fizer a troca atômica
+import java.nio.file.Files; // abre, move e confere arquivos
+import java.nio.file.Path; // caminho de um arquivo
+import java.nio.file.StandardCopyOption; // opções da troca de arquivo
+import java.util.List; // tipo de lista
+import org.json.JSONArray; // lista em formato JSON (biblioteca org.json)
+import org.json.JSONException; // erro de JSON mal formado
+import org.json.JSONObject; // objeto em formato JSON (biblioteca org.json)
 
-// Guarda os clientes em um arquivo JSON.
-// Mantém uma cópia na memória (ClienteDAOMemoria) e regrava o arquivo
-// a cada inserção ou atualização.
-public class ClienteDAOJson implements ClienteDAO {
+public class ClienteDAOJson implements DAO<Cliente> { // guarda os clientes no arquivo clientes.json
 
-    // Arquivo onde os clientes são gravados.
-    private final Path arquivo;
+    private final Path arquivo; // caminho do arquivo JSON
+    private final DAOMemoria<Cliente> memoria; // cópia em memória: as buscas são feitas aqui, sem reler o arquivo
 
-    // Clientes em memória; o arquivo é lido uma vez, na criação.
-    private final ClienteDAOMemoria memoria = new ClienteDAOMemoria();
+    public ClienteDAOJson() { // construtor sem parâmetros
+        this(Path.of("clientes.json")); // usa o arquivo padrão, na pasta do projeto
+    } // fim do construtor sem parâmetros
 
-    // Usa o arquivo informado e carrega os clientes que já estiverem nele.
-    public ClienteDAOJson(Path arquivo) {
-        if (arquivo == null) {
-            throw new IllegalArgumentException(
-                    "O caminho do arquivo JSON deve ser informado.");
-        }
-        this.arquivo = arquivo;
-        carregar();
-    }
+    public ClienteDAOJson(Path novoArquivo) { // recebe o caminho do arquivo
+        if (novoArquivo == null) { // não aceita "nenhum arquivo"
+            throw new IllegalArgumentException("Informe o arquivo de clientes."); // erro de argumento
+        } // fim do if
+        this.arquivo = novoArquivo; // guarda o caminho
+        this.memoria = new DAOMemoria<>(); // cria a memória vazia
+        carregar(); // lê os clientes que já estão no arquivo
+    } // fim do construtor com parâmetros
 
-    @Override
-    public int gerarId() {
-        return memoria.gerarId();
-    }
+    @Override // implementa o método da interface
+    public int gerarId() { // entrega um ID novo
+        return memoria.gerarId(); // a memória controla o próximo ID
+    } // fim de gerarId
 
-    @Override
-    public void inserir(Cliente cliente) {
-        exigirCompleto(cliente);
-        memoria.inserir(cliente);
-        salvar();
-    }
+    @Override // implementa o método da interface
+    public void inserir(Cliente cliente) { // guarda um cliente novo
+        exigirCompleto(cliente); // não grava cliente sem ID
+        memoria.inserir(cliente); // guarda na memória (ela recusa ID repetido)
+        salvar(); // regrava o arquivo
+    } // fim de inserir
 
-    @Override
-    public Cliente buscarPorId(int id) {
-        return memoria.buscarPorId(id);
-    }
+    @Override // implementa o método da interface
+    public Cliente buscarPorId(int id) { // procura um cliente pelo ID
+        return memoria.buscarPorId(id); // busca na memória, sem ler o arquivo
+    } // fim de buscarPorId
 
-    @Override
-    public List<Cliente> listar() {
-        return memoria.listar();
-    }
+    @Override // implementa o método da interface
+    public List<Cliente> listar() { // devolve todos os clientes
+        return memoria.listar(); // cópia da lista em memória
+    } // fim de listar
 
-    @Override
-    public void atualizar(Cliente cliente) {
-        exigirCompleto(cliente);
-        memoria.atualizar(cliente);
-        salvar();
-    }
+    @Override // implementa o método da interface
+    public void atualizar(Cliente cliente) { // grava as alterações de um cliente
+        exigirCompleto(cliente); // não grava cliente sem ID
+        memoria.atualizar(cliente); // atualiza na memória (ela recusa ID inexistente)
+        salvar(); // regrava o arquivo
+    } // fim de atualizar
 
-    // Recusa cliente incompleto: se fosse gravado, o construtor o
-    // rejeitaria na leitura e o arquivo inteiro deixaria de abrir.
-    private void exigirCompleto(Cliente cliente) {
-        boolean incompleto = cliente.getId() <= 0
-                || cliente.getNome().isBlank()
-                || cliente.getEmail().isBlank()
-                || cliente.getEndereco().isBlank()
-                || cliente.getTelefone().isBlank()
-                || cliente.getCpfPseudo().isBlank();
-        if (incompleto) {
-            throw new IllegalArgumentException(
-                    "Cliente incompleto não pode ser gravado: " + cliente);
-        }
-    }
+    @Override // implementa o método da interface
+    public boolean remover(int id) { // apaga um cliente (o sistema usa desativar, mas o contrato do DAO exige)
+        boolean removido = memoria.remover(id); // tenta remover da memória
+        if (removido) { // removeu?
+            salvar(); // regrava o arquivo
+        } // fim do if
+        return removido; // informa se removeu
+    } // fim de remover
 
-    // Lê o arquivo (se existir) e coloca os clientes na memória.
-    private void carregar() {
-        if (Files.notExists(arquivo)) {
-            return;
-        }
-        try {
-            String texto = Files.readString(arquivo, StandardCharsets.UTF_8);
-            JSONArray lista = new JSONArray(texto);
-            for (int i = 0; i < lista.length(); i++) {
-                memoria.inserir(jsonParaCliente(lista.getJSONObject(i)));
-            }
-        } catch (IOException | JSONException erro) {
-            throw new DaoException("Não foi possível ler " + arquivo, erro);
-        }
-    }
+    private void exigirCompleto(Cliente cliente) { // confere se o cliente pode ser gravado
+        if (cliente == null || cliente.getId() <= 0) { // sem cliente ou sem ID?
+            throw new IllegalArgumentException("Cliente sem ID não pode ser gravado."); // erro de argumento
+        } // fim do if
+    } // fim de exigirCompleto
 
-    // Grava todos os clientes no arquivo.
-    private void salvar() {
-        JSONArray lista = new JSONArray();
-        for (Cliente cliente : memoria.listar()) {
-            lista.put(clienteParaJson(cliente));
-        }
-        try {
-            gravarTexto(lista.toString(2));
-        } catch (IOException erro) {
-            throw new DaoException("Não foi possível gravar " + arquivo, erro);
-        }
-    }
+    private void carregar() { // lê o arquivo para a memória
+        if (Files.notExists(arquivo)) { // o arquivo ainda não existe?
+            return; // começa sem clientes
+        } // fim do if
+        try { // leitura de arquivo pode falhar
+            StringBuilder texto = new StringBuilder(); // vai juntar o conteúdo do arquivo
+            BufferedReader leitor = Files.newBufferedReader(arquivo, StandardCharsets.UTF_8); // abre o arquivo
+            try { // usa o arquivo aberto
+                String linha = leitor.readLine(); // lê a primeira linha
+                while (linha != null) { // enquanto houver linhas
+                    texto.append(linha).append('\n'); // junta a linha ao texto
+                    linha = leitor.readLine(); // lê a próxima
+                } // fim do while
+            } finally { // executa com ou sem erro
+                leitor.close(); // sempre fecha o arquivo
+            } // fim do try interno
+            JSONArray lista = new JSONArray(texto.toString()); // transforma o texto em lista JSON
+            for (int i = 0; i < lista.length(); i++) { // percorre cada cliente do arquivo
+                memoria.inserir(jsonParaCliente(lista.getJSONObject(i))); // converte e guarda na memória
+            } // fim do for
+        } catch (IOException | JSONException | IllegalArgumentException erro) { // arquivo ilegível ou dados inválidos
+            throw new DaoException("Erro ao ler " + arquivo + ".", erro); // exceção encadeada
+        } // fim do try
+    } // fim de carregar
 
-    // Converte um cliente em objeto JSON. O CPF original nunca é gravado:
-    // só o CPF pseudonimizado.
-    private JSONObject clienteParaJson(Cliente cliente) {
-        JSONObject json = new JSONObject();
-        json.put("id", cliente.getId());
-        json.put("nome", cliente.getNome());
-        json.put("endereco", cliente.getEndereco());
-        json.put("telefone", cliente.getTelefone());
-        json.put("email", cliente.getEmail());
-        json.put("cpfPseudo", cliente.getCpfPseudo());
-        json.put("ativo", cliente.isAtivo());
-        return json;
-    }
+    private void salvar() { // grava todos os clientes da memória no arquivo
+        JSONArray lista = new JSONArray(); // lista JSON vazia
+        for (Cliente cliente : memoria.listar()) { // percorre os clientes
+            lista.put(clienteParaJson(cliente)); // converte cada um e acrescenta
+        } // fim do for
+        gravarTexto(lista.toString(2)); // grava com recuo de 2 espaços (fácil de ler)
+    } // fim de salvar
 
-    // Reconstrói um cliente pelo construtor com parâmetros, que valida
-    // os dados. Se estava desativado, a situação é restaurada.
-    private Cliente jsonParaCliente(JSONObject json) {
-        Cliente cliente = new Cliente(
-                json.getInt("id"),
-                json.getString("nome"),
-                json.getString("endereco"),
-                json.getString("telefone"),
-                json.getString("email"),
-                json.getString("cpfPseudo"));
-        if (!json.getBoolean("ativo")) {
-            cliente.desativar();
-        }
-        return cliente;
-    }
+    private JSONObject clienteParaJson(Cliente cliente) { // converte um Cliente em objeto JSON
+        JSONObject json = new JSONObject(); // objeto JSON vazio
+        json.put("id", cliente.getId()); // campo id
+        json.put("nome", cliente.getNome()); // campo nome
+        json.put("endereco", cliente.getEndereco()); // campo endereco
+        json.put("telefone", cliente.getTelefone()); // campo telefone
+        json.put("email", cliente.getEmail()); // campo email
+        json.put("cpfPseudo", cliente.getCpfPseudo()); // campo cpfPseudo
+        json.put("ativo", cliente.isAtivo()); // campo ativo
+        return json; // devolve o objeto pronto
+    } // fim de clienteParaJson
 
-    // Grava em um arquivo temporário e só depois troca pelo definitivo:
-    // se algo falhar no meio, o arquivo anterior continua intacto.
-    private void gravarTexto(String conteudo) throws IOException {
-        Path pasta = arquivo.toAbsolutePath().getParent();
-        Files.createDirectories(pasta);
-        Path temporario = Files.createTempFile(pasta, "clientes-", ".tmp");
-        try {
-            Files.writeString(temporario, conteudo, StandardCharsets.UTF_8);
-            try {
-                Files.move(temporario, arquivo,
-                        StandardCopyOption.REPLACE_EXISTING,
-                        StandardCopyOption.ATOMIC_MOVE);
-            } catch (AtomicMoveNotSupportedException naoSuportado) {
-                Files.move(temporario, arquivo,
-                        StandardCopyOption.REPLACE_EXISTING);
-            }
-        } catch (IOException erro) {
-            Files.deleteIfExists(temporario);
-            throw erro;
-        }
-    }
-}
+    private Cliente jsonParaCliente(JSONObject json) { // converte um objeto JSON em Cliente
+        Cliente cliente = new Cliente(json.getInt("id"), json.getString("nome"),
+                json.getString("endereco"), json.getString("telefone"),
+                json.getString("email"), json.getString("cpfPseudo")); // o construtor valida os dados
+        if (!json.getBoolean("ativo")) { // estava desativado no arquivo?
+            cliente.desativar(); // mantém desativado
+        } // fim do if
+        return cliente; // devolve o cliente pronto
+    } // fim de jsonParaCliente
+
+    private void gravarTexto(String conteudo) { // grava com segurança: primeiro num temporário
+        Path temporario = arquivo.resolveSibling(arquivo.getFileName() + ".tmp"); // arquivo temporário ao lado do original
+        try { // gravação de arquivo pode falhar
+            BufferedWriter escritor = Files.newBufferedWriter(temporario, StandardCharsets.UTF_8); // abre o temporário
+            try { // usa o arquivo aberto
+                escritor.write(conteudo); // escreve todo o conteúdo
+            } finally { // executa com ou sem erro
+                escritor.close(); // sempre fecha o arquivo
+            } // fim do try interno
+            try { // troca o original pelo temporário de uma vez só
+                Files.move(temporario, arquivo, StandardCopyOption.REPLACE_EXISTING,
+                        StandardCopyOption.ATOMIC_MOVE); // se falhar no meio, o original continua inteiro
+            } catch (AtomicMoveNotSupportedException erro) { // o sistema não faz troca atômica?
+                Files.move(temporario, arquivo, StandardCopyOption.REPLACE_EXISTING); // troca normal
+            } // fim do try da troca
+        } catch (IOException erro) { // não conseguiu gravar
+            throw new DaoException("Erro ao gravar " + arquivo + ".", erro); // exceção encadeada
+        } // fim do try
+    } // fim de gravarTexto
+
+    @Override // sobrescreve o toString herdado de Object
+    public String toString() { // texto que representa o DAO
+        return "ClienteDAOJson em " + arquivo + " com " + memoria.listar().size() + " cliente(s)"; // arquivo e quantidade
+    } // fim de toString
+} // fim da classe ClienteDAOJson

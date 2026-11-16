@@ -2,256 +2,131 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
-package com.mycompany.academia.milho.verde.model;
+package com.mycompany.academia.milho.verde.model; // pacote do Model
 
-import com.mycompany.academia.milho.verde.dao.ClienteDAO;
-import com.mycompany.academia.milho.verde.dao.ClienteDAOMemoria;
-import java.util.ArrayList;
-import java.util.List;
+import com.mycompany.academia.milho.verde.dao.DAO; // interface genérica do DAO: a gestão não sabe onde os clientes ficam
+import com.mycompany.academia.milho.verde.dao.DAOMemoria; // DAO padrão, usado pelo construtor sem parâmetros
+import java.util.ArrayList; // lista que cresce sozinha
+import java.util.List; // tipo da lista
 
-/**
- * Gerencia o cadastro de clientes: cadastro, edição, remoção lógica, busca,
- * listagem e conta.
- *
- * <p>
- * Quem age é o funcionário usando o sistema; o {@link Cliente} só guarda dados.
- * O CPF é pseudonimizado aqui, antes de criar o objeto: o número original nunca
- * é guardado.</p>
- *
- * @author Aline Ferreira
- */
-public class GestaoClientes {
+public class GestaoClientes { // regras de negócio dos clientes
 
-    // Onde os clientes são guardados; a gestão não sabe como.
-    private final ClienteDAO dao;
+    private static final int DIGITOS_CPF = 11; // um CPF tem 11 dígitos
 
-    // Por padrão, guarda os clientes na memória.
-    public GestaoClientes() {
-        this(new ClienteDAOMemoria());
-    }
+    private final DAO<Cliente> dao; // onde os clientes ficam guardados; final: não troca depois de criado
+    private final ComparadorCliente comparador; // compara clientes pelo CPF para impedir cadastro repetido
 
-    // Usa o DAO informado.
-    public GestaoClientes(ClienteDAO dao) {
-        if (dao == null) {
-            throw new IllegalArgumentException(
-                    "O DAO de clientes deve ser informado.");
-        }
-        this.dao = dao;
-    }
+    public GestaoClientes() { // construtor sem parâmetros
+        this(new DAOMemoria<>()); // usa o DAO em memória como padrão (o <> deduz o tipo Cliente)
+    } // fim do construtor sem parâmetros
 
-    /**
-     * Cadastra um cliente novo, com ID gerado e CPF pseudonimizado.
-     *
-     * @param nome nome completo
-     * @param endereco endereço
-     * @param telefone telefone de contato
-     * @param email e-mail
-     * @param cpf CPF com 11 dígitos
-     * @return o cliente cadastrado
-     * @throws IllegalArgumentException se algum dado for inválido ou se o CPF
-     * já estiver cadastrado
-     */
-    public Cliente cadastrarCliente(String nome, String endereco,
-            String telefone, String email, String cpf) {
-        String cpfPseudo = Sistema.pseudonimizarCpf(cpf);
-        for (Cliente existente : dao.listar()) {
-            if (existente.getCpfPseudo().equals(cpfPseudo)) {
-                throw new IllegalArgumentException(
-                        "Já existe um cliente com esse CPF.");
-            }
-        }
-        Cliente cliente = new Cliente(dao.gerarId(), nome, endereco, telefone,
-                email, cpfPseudo);
-        dao.inserir(cliente);
-        return cliente;
-    }
+    public GestaoClientes(DAO<Cliente> novoDao) { // recebe o DAO que vai guardar os clientes
+        if (novoDao == null) { // não aceita "nenhum DAO"
+            throw new IllegalArgumentException("Informe o DAO de clientes."); // erro de argumento
+        } // fim do if
+        this.dao = novoDao; // guarda o DAO
+        this.comparador = new ComparadorCliente(); // cria o comparador por CPF
+    } // fim do construtor com parâmetros
 
-    /**
-     * Altera os dados de um cliente.
-     *
-     * @param id identificador do cliente
-     * @param nome novo nome
-     * @param endereco novo endereço
-     * @param telefone novo telefone
-     * @param email novo e-mail
-     * @param cpf CPF com 11 dígitos
-     * @throws IllegalArgumentException se o cliente não existir ou se algum
-     * dado for inválido
-     */
-    public void editarCliente(int id, String nome, String endereco,
-            String telefone, String email, String cpf) {
-        Cliente cliente = exigirCliente(id);
-        cliente.atualizarCadastro(nome, endereco, telefone, email,
-                Sistema.pseudonimizarCpf(cpf));
-        // Grava a mudança no DAO (e, no JSON, no arquivo)
-        dao.atualizar(cliente);
-    }
+    public Cliente cadastrarCliente(String nome, String endereco, String telefone,
+            String email, String cpf) { // cadastra um cliente novo
+        Validacao.exigirTexto(nome, "nome"); // confere tudo antes de gastar um ID
+        Validacao.exigirTexto(endereco, "endereço"); // idem
+        Validacao.exigirTexto(telefone, "telefone"); // idem
+        Validacao.exigirTexto(email, "e-mail"); // idem
+        String cpfPseudo = pseudonimizarCpf(cpf); // valida o CPF e o transforma; o original não é guardado
+        exigirCpfLivre(cpfPseudo, 0); // ninguém pode ter o mesmo CPF (0: nenhum cliente a ignorar)
+        Cliente cliente = new Cliente(dao.gerarId(), nome, endereco,
+                telefone, email, cpfPseudo); // cria o cliente com um ID novo
+        dao.inserir(cliente); // guarda no DAO
+        return cliente; // devolve o cliente criado
+    } // fim de cadastrarCliente
 
-    /**
-     * Remove um cliente por exclusão lógica: o cadastro é desativado e
-     * agendamentos, compras e registros da catraca são preservados.
-     *
-     * @param id identificador do cliente
-     * @throws IllegalArgumentException se o cliente não existir
-     */
-    public void removerCliente(int id) {
-       Cliente cliente = exigirCliente(id);
-       cliente.desativar();
-       dao.atualizar(cliente);
-    }
+    public void editarCliente(int id, String nome, String endereco, String telefone,
+            String email, String cpf) { // altera os dados de um cliente
+        Cliente cliente = exigirCliente(id); // busca; se não existir, lança erro
+        String nomeValido = Validacao.exigirTexto(nome, "nome"); // confere tudo antes de alterar
+        String enderecoValido = Validacao.exigirTexto(endereco, "endereço"); // idem
+        String telefoneValido = Validacao.exigirTexto(telefone, "telefone"); // idem
+        String emailValido = Validacao.exigirTexto(email, "e-mail"); // idem
+        String cpfPseudo = pseudonimizarCpf(cpf); // idem para o CPF
+        exigirCpfLivre(cpfPseudo, id); // outro cliente não pode ter este CPF (ignora o próprio)
+        cliente.setNome(nomeValido); // tudo válido: agora altera
+        cliente.setEndereco(enderecoValido); // altera o endereço
+        cliente.setTelefone(telefoneValido); // altera o telefone
+        cliente.setEmail(emailValido); // altera o e-mail
+        cliente.setCpfPseudo(cpfPseudo); // altera o CPF
+        dao.atualizar(cliente); // avisa o DAO (no DAO de JSON, é aqui que grava o arquivo)
+    } // fim de editarCliente
 
-    /**
-     * Reativa um cliente desativado, com todo o histórico dele.
-     *
-     * @param id identificador do cliente
-     * @throws IllegalArgumentException se o cliente não existir
-     * @throws IllegalStateException se o cliente já estiver ativo
-     */
-    public void reativarCliente(int id) {
-        Cliente cliente = exigirCliente(id);
-        if (cliente.isAtivo()) {
-            throw new IllegalStateException("O cliente já está ativo.");
-        }
-        cliente.ativar();
-        dao.atualizar(cliente);
-    }
+    public void removerCliente(int id) { // "excluir cliente": exclusão lógica
+        Cliente cliente = exigirCliente(id); // busca; se não existir, lança erro
+        cliente.desativar(); // desativa sem apagar o histórico
+        dao.atualizar(cliente); // avisa o DAO
+    } // fim de removerCliente
 
-    /**
-     * Procura um cliente pelo identificador.
-     *
-     * @param id identificador procurado
-     * @return o cliente, ou {@code null} se o ID não existir
-     */
-    public Cliente buscarCliente(int id) {
-        for (Cliente cliente : dao.listar()) {
-            if (cliente.getId() == id) {
-                return cliente;
-            }
-        }
-        return null;
-    }
+    public void reativarCliente(int id) { // desfaz a remoção
+        Cliente cliente = exigirCliente(id); // busca; se não existir, lança erro
+        cliente.ativar(); // volta a ficar ativo
+        dao.atualizar(cliente); // avisa o DAO
+    } // fim de reativarCliente
 
-    /**
-     * Procura os clientes que têm alguma palavra do nome começando pelo trecho,
-     * sem diferenciar maiúsculas e minúsculas.
-     *
-     * <p>
-     * Percorre a lista e compara cada palavra do nome, uma por uma: "ana" acha
-     * "Ana Souza", mas não "Juliana"; "mart" acha "Juliana Martins". Devolve
-     * também os desativados, para o funcionário ver o histórico.</p>
-     *
-     * @param trecho parte do nome procurada (por exemplo, "ana")
-     * @return lista com os clientes encontrados (vazia se nenhum)
-     * @throws IllegalArgumentException se o trecho estiver vazio
-     */
-    public List<Cliente> buscarPorNome(String trecho) {
-        if (trecho == null || trecho.isBlank()) {
-            throw new IllegalArgumentException(
-                    "Informe parte do nome para buscar.");
-        }
-        String procurado = trecho.trim().toLowerCase();
-        List<Cliente> encontrados = new ArrayList<>();
-        for (Cliente cliente : dao.listar()) {
-            // Compara o começo de cada palavra do nome.
-            for (String palavra : cliente.getNome().toLowerCase().split(" ")) {
-                if (palavra.startsWith(procurado)) {
-                    encontrados.add(cliente);
-                    break;
-                }
-            }
-        }
-        return encontrados;
-    }
+    public Cliente buscarCliente(int id) { // busca pelo ID
+        return dao.buscarPorId(id); // devolve o cliente ou null
+    } // fim de buscarCliente
 
-    /**
-     * Lista os clientes ativos, ordenados pelo critério.
-     *
-     * @param criterio {@link ComparadorCliente#ID} ou
-     * {@link ComparadorCliente#NOME}
-     * @return lista nova de clientes ativos, ordenada
-     * @throws IllegalArgumentException se o critério for inválido
-     */
-    public List<Cliente> listarClientes(String criterio) {
-        ComparadorCliente comparador = new ComparadorCliente(criterio);
-        List<Cliente> ativos = new ArrayList<>();
-        for (Cliente cliente : dao.listar()) {
-            if (cliente.isAtivo()) {
-                ativos.add(cliente);
-            }
-        }
-        ativos.sort(comparador);
-        return ativos;
-    }
+    public List<Cliente> buscarPorNome(String trecho) { // busca pelo começo de qualquer palavra do nome
+        String procurado = Validacao.exigirTexto(trecho, "nome para busca").toLowerCase(); // texto em minúsculas
+        List<Cliente> encontrados = new ArrayList<>(); // resultado começa vazio
+        for (Cliente cliente : dao.listar()) { // percorre todos os clientes
+            for (String palavra : cliente.getNome().toLowerCase().split(" ")) { // percorre cada palavra do nome
+                if (palavra.startsWith(procurado)) { // a palavra começa com o texto digitado?
+                    encontrados.add(cliente); // achou: entra no resultado
+                    break; // não precisa olhar as outras palavras deste cliente
+                } // fim do if
+            } // fim do for das palavras
+        } // fim do for dos clientes
+        return encontrados; // devolve quem foi encontrado (pode ser vazia)
+    } // fim de buscarPorNome
 
-    /**
-     * Emite a conta de um cliente: os extratos de todas as compras.
-     *
-     * @param idCliente identificador do cliente
-     * @return os extratos do cliente
-     * @throws IllegalArgumentException se o cliente não existir
-     */
-    public List<Extrato> emitirConta(int idCliente) {
-        return exigirCliente(idCliente).getExtratos();
-    }
+    public List<Cliente> listarClientes() { // lista todos os clientes
+        return dao.listar(); // na ordem em que estão guardados (ordem de ID)
+    } // fim de listarClientes
 
-    /**
-     * Soma o valor de todos os extratos de um cliente.
-     *
-     * @param idCliente identificador do cliente
-     * @return o total da conta em reais
-     * @throws IllegalArgumentException se o cliente não existir
-     */
-    public double calcularTotalConta(int idCliente) {
-        double total = 0;
-        for (Extrato extrato : emitirConta(idCliente)) {
-            total += extrato.getValor();
-        }
-        return total;
-    }
+    List<Cliente> getClientes() { // acesso de pacote: usado por outras classes do model
+        return dao.listar(); // devolve uma cópia da lista
+    } // fim de getClientes
 
-    /**
-     * Retorna todos os clientes, ativos e desativados.
-     *
-     * <p>
-     * Acesso de pacote: usado pelo {@link RepositorioJson}.</p>
-     *
-     * @return cópia da lista de clientes
-     */
-    List<Cliente> getClientes() {
-        return new ArrayList<>(dao.listar());
-    }
+    private Cliente exigirCliente(int id) { // busca e exige que exista
+        Cliente cliente = dao.buscarPorId(id); // procura pelo ID
+        if (cliente == null) { // não encontrou?
+            throw new IllegalArgumentException("Cliente " + id + " não encontrado."); // erro de argumento
+        } // fim do if
+        return cliente; // devolve o cliente encontrado
+    } // fim de exigirCliente
 
-    // Guarda no DAO os clientes lidos do arquivo (usado pelo RepositorioJson).
-    // Supõe o DAO vazio: chamar duas vezes duplicaria os clientes.
-    void carregar(List<Cliente> lidos) {
-        for (Cliente cliente : lidos) {
-            dao.inserir(cliente);
-        }
-    }
+    private void exigirCpfLivre(String cpfPseudo, int idIgnorado) { // impede dois clientes com o mesmo CPF
+        Cliente candidato = new Cliente(); // cliente "molde", sem ID, só para a comparação
+        candidato.setCpfPseudo(cpfPseudo); // coloca nele o CPF que se quer usar
+        for (Cliente existente : dao.listar()) { // percorre os clientes guardados
+            boolean mesmoCpf = comparador.compare(existente, candidato) == 0; // o comparador diz se os CPFs são iguais
+            if (mesmoCpf && existente.getId() != idIgnorado) { // CPF igual em OUTRO cliente?
+                throw new IllegalArgumentException("Já existe cliente com este CPF (ID "
+                        + existente.getId() + ")."); // não deixa repetir
+            } // fim do if
+        } // fim do for
+    } // fim de exigirCpfLivre
 
-    /**
-     * Procura um cliente e falha se não existir.
-     *
-     * @param id identificador procurado
-     * @return o cliente
-     * @throws IllegalArgumentException se o ID não existir
-     */
-    private Cliente exigirCliente(int id) {
-        Cliente cliente = buscarCliente(id);
-        if (cliente == null) {
-            throw new IllegalArgumentException(
-                    "Cliente " + id + " não encontrado.");
-        }
-        return cliente;
-    }
+    private static String pseudonimizarCpf(String cpf) { // transforma o CPF para não guardar o número real
+        String digitos = Validacao.exigirTexto(cpf, "CPF").replaceAll("\\D", ""); // tira pontos, traço e espaços
+        if (digitos.length() != DIGITOS_CPF) { // precisa ter 11 dígitos
+            throw new IllegalArgumentException("O CPF deve ter 11 dígitos."); // erro de argumento
+        } // fim do if
+        return Integer.toHexString(digitos.hashCode()); // código do texto em hexadecimal; o CPF real não é guardado
+    } // fim de pseudonimizarCpf
 
-    /**
-     * Retorna um resumo da gestão.
-     *
-     * @return texto com o número de clientes
-     */
-    @Override
-    public String toString() {
-        return "GestaoClientes[" + dao.listar().size() + " cliente(s)]";
-    }
-}
+    @Override // sobrescreve o toString herdado de Object
+    public String toString() { // texto que representa a gestão
+        return "GestaoClientes com " + dao.listar().size() + " cliente(s)"; // mostra quantos clientes há
+    } // fim de toString
+} // fim da classe GestaoClientes

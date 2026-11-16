@@ -2,154 +2,64 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
-package com.mycompany.academia.milho.verde.model;
+package com.mycompany.academia.milho.verde.model; // pacote do Model
 
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
+import java.time.LocalDateTime; // data e hora da aula
 
-/**
- * Representa uma aula oferecida em uma sala, em um dia e horário.
- *
- * <p>O tipo da aula é a modalidade da sala. O instrutor é registrado
- * pelo nome, como pede o enunciado. Cada aula ocupa uma célula da
- * {@link AgendaSemanal} da sua sala.</p>
- *
- * @author Aline Ferreira
- */
-public class Aula {
+public class Aula implements Identificavel { // uma aula de uma hora, numa sala, num dia e horário
 
-    /** Identificador único (0 enquanto não definido). */
-    private int id;
+    private final int id; // identificador da aula; final: não muda
+    private final Sala sala; // sala onde a aula acontece (associação com Sala)
+    private final LocalDateTime dataHora; // dia e hora de início da aula
+    private final String nomeInstrutor; // quem dá a aula
 
-    /** Sala onde a aula acontece. */
-    private Sala sala;
+    public Aula() { // construtor sem parâmetros
+        this.id = 0; // ainda sem ID
+        this.sala = null; // ainda sem sala
+        this.dataHora = null; // ainda sem data
+        this.nomeInstrutor = ""; // ainda sem instrutor
+    } // fim do construtor sem parâmetros
 
-    /** Data e hora de início da aula. */
-    private LocalDateTime dataHora;
+    public Aula(int novoId, Sala novaSala, LocalDateTime novaDataHora, String novoInstrutor) { // construtor com parâmetros
+        if (novoId <= 0) { // o ID precisa ser positivo
+            throw new IllegalArgumentException("O ID da aula deve ser maior que zero."); // erro de argumento
+        } // fim do if
+        if (novaSala == null) { // toda aula acontece numa sala
+            throw new IllegalArgumentException("Informe a sala da aula."); // erro de argumento
+        } // fim do if
+        if (novaDataHora == null) { // toda aula tem dia e hora
+            throw new IllegalArgumentException("Informe a data e a hora da aula."); // erro de argumento
+        } // fim do if
+        this.id = novoId; // guarda o ID
+        this.sala = novaSala; // guarda a sala
+        this.dataHora = novaDataHora; // guarda a data e a hora
+        this.nomeInstrutor = Validacao.exigirTexto(novoInstrutor, "instrutor"); // instrutor obrigatório
+    } // fim do construtor com parâmetros
 
-    /** Nome do instrutor. */
-    private String nomeInstrutor;
+    @Override // implementa o método da interface Identificavel
+    public int getId() { // getter do ID
+        return id; // devolve o ID
+    } // fim de getId
 
-    /**
-     * Construtor padrão: cria uma aula em branco.
-     */
-    public Aula() {
-        this.id = 0;
-        this.sala = null;
-        this.dataHora = null;
-        this.nomeInstrutor = "";
-    }
+    public Sala getSala() { // getter da sala
+        return sala; // devolve a sala
+    } // fim de getSala
 
-    /**
-     * Construtor com parâmetros.
-     *
-     * @param novoId identificador positivo
-     * @param novaSala sala da aula
-     * @param novaDataHora data e hora de início
-     * @param novoInstrutor nome do instrutor
-     * @throws IllegalArgumentException se algum dado for inválido
-     */
-    public Aula(int novoId, Sala novaSala, LocalDateTime novaDataHora,
-                String novoInstrutor) {
-        if (novoId <= 0) {
-            throw new IllegalArgumentException(
-                    "O identificador deve ser positivo.");
-        }
-        if (novaSala == null) {
-            throw new IllegalArgumentException("A sala é obrigatória.");
-        }
-        if (novaDataHora == null) {
-            throw new IllegalArgumentException(
-                    "A data e a hora da aula são obrigatórias.");
-        }
-        if (novoInstrutor == null || novoInstrutor.isBlank()) {
-            throw new IllegalArgumentException(
-                    "O nome do instrutor deve ser preenchido.");
-        }
-        this.id = novoId;
-        this.sala = novaSala;
-        this.dataHora = novaDataHora;
-        this.nomeInstrutor = novoInstrutor;
-    }
+    public String getModalidade() { // a modalidade vem da sala
+        return sala.getModalidade(); // pergunta à sala (delegação)
+    } // fim de getModalidade
 
-    /**
-     * Retorna o identificador.
-     *
-     * @return o ID, ou 0 se ainda não foi definido
-     */
-    public int getId() {
-        return id;
-    }
+    public LocalDateTime getDataHora() { // getter da data e hora
+        return dataHora; // devolve a data e a hora
+    } // fim de getDataHora
 
-    /**
-     * Retorna a sala da aula.
-     *
-     * @return a sala
-     */
-    public Sala getSala() {
-        return sala;
-    }
+    public String getNomeInstrutor() { // getter do instrutor
+        return nomeInstrutor; // devolve o nome do instrutor
+    } // fim de getNomeInstrutor
 
-    /**
-     * Retorna a modalidade, que é a da sala.
-     *
-     * @return a modalidade, ou texto vazio se a aula não tem sala
-     */
-    public String getModalidade() {
-        return (sala == null) ? "" : sala.getModalidade();
-    }
-
-    /**
-     * Retorna a data e a hora de início.
-     *
-     * @return a data e a hora
-     */
-    public LocalDateTime getDataHora() {
-        return dataHora;
-    }
-
-    /**
-     * Retorna o nome do instrutor.
-     *
-     * @return o nome
-     */
-    public String getNomeInstrutor() {
-        return nomeInstrutor;
-    }
-
-    /**
-     * Define o identificador de uma aula criada pelo construtor padrão.
-     *
-     * <p>Tem acesso de pacote e funciona uma única vez.</p>
-     *
-     * @param novoId identificador positivo
-     * @throws IllegalArgumentException se não for positivo
-     * @throws IllegalStateException se a aula já tiver identificador
-     */
-    void definirId(int novoId) {
-        if (this.id != 0) {
-            throw new IllegalStateException(
-                    "O identificador já foi definido.");
-        }
-        if (novoId <= 0) {
-            throw new IllegalArgumentException(
-                    "O identificador deve ser positivo.");
-        }
-        this.id = novoId;
-    }
-
-    /**
-     * Retorna uma descrição legível da aula.
-     *
-     * @return texto com ID, modalidade, sala, data e instrutor
-     */
-    @Override
-    public String toString() {
-        String quando = (dataHora == null) ? "-"
-                : dataHora.format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm"));
-        String codigoSala = (sala == null) ? "-" : String.valueOf(sala.getCodigo());
-        return "Aula[id=" + id + ", " + getModalidade()
-                + ", sala=" + codigoSala + ", " + quando
-                + ", instrutor=" + nomeInstrutor + "]";
-    }
-}
+    @Override // sobrescreve o toString herdado de Object
+    public String toString() { // texto que representa a aula
+        return "Aula " + id + " | " + sala.getModalidade() + " (sala " + sala.getCodigo() + ") | "
+                + dataHora + " | " + nomeInstrutor; // ID, modalidade, sala, data/hora e instrutor
+    } // fim de toString
+} // fim da classe Aula

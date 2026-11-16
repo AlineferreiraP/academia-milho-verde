@@ -2,435 +2,209 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
-package com.mycompany.academia.milho.verde.model;
+package com.mycompany.academia.milho.verde.model; // pacote do Model
 
-import java.time.DayOfWeek;
-import java.time.LocalDate;
-import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
-import java.util.List;
+import java.time.DayOfWeek; // dias da semana (para saber o que é dia útil)
+import java.time.LocalDate; // datas sem hora
+import java.time.temporal.ChronoUnit; // conta dias entre duas datas
+import java.util.ArrayList; // lista que cresce
+import java.util.List; // tipo genérico de lista
 
-/**
- * Representa a reserva de uma ou mais aulas feita por um cliente.
- *
- * <p>Todo agendamento começa {@link #PRELIMINAR}. O funcionário
- * confirma até 5 dias úteis antes da primeira aula; se o prazo passar,
- * o agendamento é cancelado. O cancelamento de uma reserva confirmada
- * devolve 50% do preço quando faltam 3 dias ou mais.</p>
- *
- * @author Aline Ferreira
- */
-public class Agendamento {
+public class Agendamento implements Identificavel { // a reserva de um cliente em uma ou mais aulas
 
-    /** Tipo de cobrança: diária. */
-    public static final String DIARIA = "DIARIA";
+    public static final String DIARIA = "DIARIA"; // tipo de cobrança: paga por dia
+    public static final String MENSALIDADE = "MENSALIDADE"; // tipo de cobrança: paga por mês
+    public static final String PRELIMINAR = "PRELIMINAR"; // situação: reservado, ainda não pago
+    public static final String CONFIRMADO = "CONFIRMADO"; // situação: confirmado e debitado no cartão
+    public static final String CANCELADO = "CANCELADO"; // situação: cancelado, vaga liberada
+    private static final int DIAS_UTEIS_CONFIRMACAO = 5; // confirmar até 5 dias úteis antes da primeira aula
+    private static final int DIAS_PARA_DEVOLUCAO = 3; // desistir com 3 dias ou mais devolve metade
 
-    /** Tipo de cobrança: mensalidade. */
-    public static final String MENSALIDADE = "MENSALIDADE";
+    private final int id; // identificador do agendamento; final: não muda
+    private final Cliente cliente; // quem reservou (associação com Cliente)
+    private final List<Aula> aulas; // aulas reservadas (associação com Aula)
+    private final String tipoCobranca; // DIARIA ou MENSALIDADE
+    private final double preco; // valor a debitar na confirmação
+    private final String cartaoMascarado; // só os 4 últimos dígitos, no formato "**** 1234"
+    private String status; // PRELIMINAR, CONFIRMADO ou CANCELADO; muda só pelos métodos abaixo
 
-    /** Situação: reservado, ainda sem cobrança. */
-    public static final String PRELIMINAR = "PRELIMINAR";
+    public Agendamento() { // construtor sem parâmetros
+        this.id = 0; // ainda sem ID
+        this.cliente = null; // ainda sem cliente
+        this.aulas = new ArrayList<>(); // lista vazia
+        this.tipoCobranca = ""; // ainda sem tipo
+        this.preco = 0; // ainda sem preço
+        this.cartaoMascarado = ""; // ainda sem cartão
+        this.status = PRELIMINAR; // todo agendamento nasce preliminar
+    } // fim do construtor sem parâmetros
 
-    /** Situação: confirmado e cobrado. */
-    public static final String CONFIRMADO = "CONFIRMADO";
+    public Agendamento(int novoId, Cliente novoCliente, List<Aula> novasAulas, String novoTipo,
+            double novoPreco, String novoCartao) { // construtor usado no atendimento: recebe o cartão inteiro
+        this(novoId, novoCliente, novasAulas, novoTipo, novoPreco, mascararCartao(novoCartao), PRELIMINAR); // guarda só o mascarado e nasce preliminar
+    } // fim do construtor do atendimento
 
-    /** Situação: cancelado. */
-    public static final String CANCELADO = "CANCELADO";
+    Agendamento(int novoId, Cliente novoCliente, List<Aula> novasAulas, String novoTipo,
+            double novoPreco, String novoCartaoMascarado, String novoStatus) { // acesso de pacote: usado também ao carregar do JSON
+        if (novoId <= 0) { // o ID precisa ser positivo
+            throw new IllegalArgumentException("O ID do agendamento deve ser maior que zero."); // erro de argumento
+        } // fim do if
+        if (novoCliente == null) { // todo agendamento é de um cliente
+            throw new IllegalArgumentException("Informe o cliente do agendamento."); // erro de argumento
+        } // fim do if
+        if (novoPreco <= 0) { // o preço precisa ser positivo
+            throw new IllegalArgumentException("O preço deve ser maior que zero."); // erro de argumento
+        } // fim do if
+        this.id = novoId; // guarda o ID
+        this.cliente = novoCliente; // guarda o cliente
+        this.aulas = exigirAulas(novasAulas); // guarda uma cópia da lista de aulas
+        this.tipoCobranca = exigirTipoCobranca(novoTipo); // só DIARIA ou MENSALIDADE
+        this.preco = novoPreco; // guarda o preço
+        this.cartaoMascarado = exigirCartaoMascarado(novoCartaoMascarado); // confere o formato "**** 1234"
+        this.status = exigirStatus(novoStatus); // PRELIMINAR no atendimento; a situação salva ao carregar
+    } // fim do construtor de pacote
 
-    /** Dias úteis de antecedência para confirmar. */
-    private static final int DIAS_UTEIS_CONFIRMACAO = 5;
+    @Override // implementa o método da interface Identificavel
+    public int getId() { // getter do ID
+        return id; // devolve o ID
+    } // fim de getId
 
-    /** Dias corridos mínimos para ter devolução ao cancelar. */
-    private static final int DIAS_PARA_DEVOLUCAO = 3;
+    public Cliente getCliente() { // getter do cliente
+        return cliente; // devolve o cliente
+    } // fim de getCliente
 
-    /** Identificador único (0 enquanto não definido). */
-    private int id;
+    public List<Aula> getAulas() { // getter das aulas
+        return new ArrayList<>(aulas); // devolve uma cópia: quem recebe não altera a lista original
+    } // fim de getAulas
 
-    /** Cliente que reservou. */
-    private Cliente cliente;
+    public String getTipoCobranca() { // getter do tipo de cobrança
+        return tipoCobranca; // devolve DIARIA ou MENSALIDADE
+    } // fim de getTipoCobranca
 
-    /** Aulas reservadas. */
-    private List<Aula> aulas;
+    public double getPreco() { // getter do preço
+        return preco; // devolve o preço
+    } // fim de getPreco
 
-    /** Tipo de cobrança: {@link #DIARIA} ou {@link #MENSALIDADE}. */
-    private String tipoCobranca;
+    public String getCartaoMascarado() { // cartão para mostrar na tela e para salvar
+        return cartaoMascarado; // só os 4 últimos dígitos aparecem
+    } // fim de getCartaoMascarado
 
-    /** Preço total da reserva, em reais. */
-    private double preco;
+    public String getStatus() { // getter da situação
+        return status; // devolve PRELIMINAR, CONFIRMADO ou CANCELADO
+    } // fim de getStatus
 
-    /** Número do cartão do cliente (nunca aparece por inteiro no texto). */
-    private String numeroCartao;
+    public LocalDate getPrimeiraData() { // dia da aula mais cedo do agendamento
+        LocalDate primeira = aulas.get(0).getDataHora().toLocalDate(); // começa pela primeira da lista
+        for (Aula aula : aulas) { // percorre todas as aulas
+            LocalDate data = aula.getDataHora().toLocalDate(); // dia desta aula
+            if (data.isBefore(primeira)) { // se for antes da que temos
+                primeira = data; // passa a ser a primeira
+            } // fim do if
+        } // fim do for
+        return primeira; // devolve o dia mais cedo
+    } // fim de getPrimeiraData
 
-    /** Situação: preliminar, confirmado ou cancelado. */
-    private String status;
+    public LocalDate calcularPrazoConfirmacao() { // último dia para o cliente confirmar
+        return subtrairDiasUteis(getPrimeiraData(), DIAS_UTEIS_CONFIRMACAO); // 5 dias úteis antes da primeira aula
+    } // fim de calcularPrazoConfirmacao
 
-    /** Valor devolvido ao cancelar (0 até haver cancelamento). */
-    private double valorDevolvido;
+    public boolean confirmar(LocalDate hoje) { // cliente confirmou por telefone
+        if (hoje == null) { // precisa saber o dia de hoje
+            throw new IllegalArgumentException("Informe a data de hoje."); // erro de argumento
+        } // fim do if
+        if (!PRELIMINAR.equals(status)) { // só se confirma o que ainda é preliminar
+            throw new IllegalStateException("Só agendamento preliminar pode ser confirmado."); // erro de estado
+        } // fim do if
+        if (hoje.isAfter(calcularPrazoConfirmacao())) { // passou do prazo
+            status = CANCELADO; // cancela e libera a vaga
+            return false; // avisa que não confirmou
+        } // fim do if
+        status = CONFIRMADO; // dentro do prazo: confirma
+        return true; // avisa que confirmou (quem chamou registra o pagamento)
+    } // fim de confirmar
 
-    /**
-     * Construtor padrão: cria um agendamento em branco, preliminar.
-     */
-    public Agendamento() {
-        this.id = 0;
-        this.cliente = null;
-        this.aulas = new ArrayList<>();
-        this.tipoCobranca = "";
-        this.preco = 0;
-        this.numeroCartao = "";
-        this.status = PRELIMINAR;
-        this.valorDevolvido = 0;
-    }
+    public double cancelar(LocalDate hoje) { // cliente desistiu; devolve quanto deve voltar a ele
+        if (hoje == null) { // precisa saber o dia de hoje
+            throw new IllegalArgumentException("Informe a data de hoje."); // erro de argumento
+        } // fim do if
+        if (CANCELADO.equals(status)) { // não se cancela duas vezes
+            throw new IllegalStateException("Este agendamento já está cancelado."); // erro de estado
+        } // fim do if
+        double aDevolver = 0; // começa sem devolução
+        long diasQueFaltam = ChronoUnit.DAYS.between(hoje, getPrimeiraData()); // dias até a primeira aula
+        if (CONFIRMADO.equals(status) && diasQueFaltam >= DIAS_PARA_DEVOLUCAO) { // já pagou e avisou a tempo
+            aDevolver = preco / 2; // devolve metade; a academia fica com a outra metade
+        } // fim do if
+        status = CANCELADO; // agora está cancelado
+        return aDevolver; // preliminar ou em cima da hora devolve 0; quem chamou registra no pagamento
+    } // fim de cancelar
 
-    /**
-     * Construtor com parâmetros: cria um agendamento preliminar.
-     *
-     * @param novoId identificador positivo
-     * @param novoCliente cliente que reserva
-     * @param novasAulas aulas reservadas (pelo menos uma)
-     * @param novoTipo {@link #DIARIA} ou {@link #MENSALIDADE}
-     * @param novoPreco preço total, maior que zero
-     * @param novoCartao número do cartão (13 a 19 dígitos)
-     * @throws IllegalArgumentException se algum dado for inválido
-     */
-    public Agendamento(int novoId, Cliente novoCliente, List<Aula> novasAulas,
-                       String novoTipo, double novoPreco, String novoCartao) {
-        if (novoId <= 0) {
-            throw new IllegalArgumentException(
-                    "O identificador deve ser positivo.");
-        }
-        if (novoCliente == null) {
-            throw new IllegalArgumentException("O cliente é obrigatório.");
-        }
-        if (novasAulas == null || novasAulas.isEmpty()) {
-            throw new IllegalArgumentException(
-                    "Escolha pelo menos uma aula.");
-        }
-        for (Aula aula : novasAulas) {
-            if (aula == null) {
-                throw new IllegalArgumentException("Aula inválida.");
-            }
-        }
-        if (novoPreco <= 0) {
-            throw new IllegalArgumentException(
-                    "O preço deve ser maior que zero.");
-        }
-        this.id = novoId;
-        this.cliente = novoCliente;
-        this.aulas = new ArrayList<>(novasAulas);
-        this.tipoCobranca = exigirTipoCobranca(novoTipo);
-        this.preco = novoPreco;
-        this.numeroCartao = exigirCartao(novoCartao);
-        this.status = PRELIMINAR;
-        this.valorDevolvido = 0;
-    }
+    public boolean cancelarSeVencido(LocalDate hoje) { // cancela o preliminar que perdeu o prazo
+        if (PRELIMINAR.equals(status) && hoje.isAfter(calcularPrazoConfirmacao())) { // preliminar e prazo vencido
+            status = CANCELADO; // cancela e libera a vaga
+            return true; // avisa que cancelou
+        } // fim do if
+        return false; // nada mudou
+    } // fim de cancelarSeVencido
 
-    /**
-     * Retorna o identificador.
-     *
-     * @return o ID, ou 0 se ainda não foi definido
-     */
-    public int getId() {
-        return id;
-    }
+    private static List<Aula> exigirAulas(List<Aula> novasAulas) { // confere a lista de aulas
+        if (novasAulas == null || novasAulas.isEmpty()) { // precisa de pelo menos uma aula
+            throw new IllegalArgumentException("Escolha pelo menos uma aula."); // erro de argumento
+        } // fim do if
+        for (Aula aula : novasAulas) { // percorre a lista
+            if (aula == null) { // nenhuma posição pode estar vazia
+                throw new IllegalArgumentException("Há uma aula inválida na lista."); // erro de argumento
+            } // fim do if
+        } // fim do for
+        return new ArrayList<>(novasAulas); // guarda uma cópia: mudanças lá fora não afetam o agendamento
+    } // fim de exigirAulas
 
-    /**
-     * Retorna o cliente.
-     *
-     * @return o cliente
-     */
-    public Cliente getCliente() {
-        return cliente;
-    }
+    private static LocalDate subtrairDiasUteis(LocalDate data, int dias) { // volta N dias úteis no calendário
+        LocalDate resultado = data; // começa na data informada
+        int contados = 0; // dias úteis já contados
+        while (contados < dias) { // até contar todos
+            resultado = resultado.minusDays(1); // volta um dia
+            DayOfWeek dia = resultado.getDayOfWeek(); // que dia da semana é
+            if (dia != DayOfWeek.SATURDAY && dia != DayOfWeek.SUNDAY) { // segunda a sexta é dia útil
+                contados++; // conta mais um dia útil
+            } // fim do if
+        } // fim do while
+        return resultado; // devolve a data do prazo
+    } // fim de subtrairDiasUteis
 
-    /**
-     * Retorna as aulas reservadas.
-     *
-     * @return cópia da lista de aulas
-     */
-    public List<Aula> getAulas() {
-        return new ArrayList<>(aulas);
-    }
+    private static String exigirTipoCobranca(String valor) { // confere o tipo de cobrança
+        String tipo = Validacao.exigirTexto(valor, "tipo de cobrança").toUpperCase(); // obrigatório, em maiúsculas
+        if (!DIARIA.equals(tipo) && !MENSALIDADE.equals(tipo)) { // só os dois tipos do enunciado
+            throw new IllegalArgumentException("O tipo de cobrança deve ser DIARIA ou MENSALIDADE."); // erro de argumento
+        } // fim do if
+        return tipo; // devolve o tipo conferido
+    } // fim de exigirTipoCobranca
 
-    /**
-     * Retorna o tipo de cobrança.
-     *
-     * @return {@link #DIARIA} ou {@link #MENSALIDADE}
-     */
-    public String getTipoCobranca() {
-        return tipoCobranca;
-    }
+    private static String mascararCartao(String valor) { // confere o cartão inteiro e guarda só o final
+        String digitos = Validacao.exigirTexto(valor, "número do cartão").replaceAll("\\D", ""); // tira espaços e traços
+        if (digitos.length() < 13 || digitos.length() > 19) { // cartões têm de 13 a 19 dígitos
+            throw new IllegalArgumentException("Número de cartão inválido."); // erro de argumento
+        } // fim do if
+        return "**** " + digitos.substring(digitos.length() - 4); // o número inteiro não fica guardado
+    } // fim de mascararCartao
 
-    /**
-     * Retorna o preço total.
-     *
-     * @return o preço em reais
-     */
-    public double getPreco() {
-        return preco;
-    }
+    private static String exigirCartaoMascarado(String valor) { // confere o formato do cartão mascarado
+        if (valor == null || !valor.matches("\\*{4} \\d{4}")) { // tem que ser "**** " e 4 dígitos
+            throw new IllegalArgumentException("Cartão mascarado inválido."); // erro de argumento
+        } // fim do if
+        return valor; // devolve o cartão mascarado conferido
+    } // fim de exigirCartaoMascarado
 
-    /**
-     * Retorna o cartão com só os 4 últimos dígitos visíveis.
-     *
-     * @return por exemplo {@code **** **** **** 1234}
-     */
-    public String getCartaoMascarado() {
-        if (numeroCartao.length() < 4) {
-            return "****";
-        }
-        return "**** **** **** "
-                + numeroCartao.substring(numeroCartao.length() - 4);
-    }
+    private static String exigirStatus(String valor) { // confere a situação
+        if (!PRELIMINAR.equals(valor) && !CONFIRMADO.equals(valor) && !CANCELADO.equals(valor)) { // só as três situações
+            throw new IllegalArgumentException("Situação de agendamento inválida."); // erro de argumento
+        } // fim do if
+        return valor; // devolve a situação conferida
+    } // fim de exigirStatus
 
-    /**
-     * Retorna o número completo do cartão, para gravação no arquivo.
-     *
-     * <p>Acesso de pacote: só o {@link RepositorioJson} usa.</p>
-     *
-     * @return o número do cartão
-     */
-    String getNumeroCartao() {
-        return numeroCartao;
-    }
-
-    /**
-     * Retorna a situação.
-     *
-     * @return {@link #PRELIMINAR}, {@link #CONFIRMADO} ou {@link #CANCELADO}
-     */
-    public String getStatus() {
-        return status;
-    }
-
-    /**
-     * Retorna o valor devolvido no cancelamento.
-     *
-     * @return o valor em reais (0 se não houve devolução)
-     */
-    public double getValorDevolvido() {
-        return valorDevolvido;
-    }
-
-    /**
-     * Retorna a data da primeira aula reservada.
-     *
-     * @return a data mais cedo entre as aulas, ou {@code null} se não
-     *         há aulas
-     */
-    public LocalDate getPrimeiraData() {
-        LocalDate primeira = null;
-        for (Aula aula : aulas) {
-            LocalDate data = aula.getDataHora().toLocalDate();
-            if (primeira == null || data.isBefore(primeira)) {
-                primeira = data;
-            }
-        }
-        return primeira;
-    }
-
-    /**
-     * Calcula o último dia para confirmar: 5 dias úteis (segunda a
-     * sexta) antes da primeira aula.
-     *
-     * @return a data limite, ou {@code null} se não há aulas
-     */
-    public LocalDate calcularPrazoConfirmacao() {
-        LocalDate primeira = getPrimeiraData();
-        if (primeira == null) {
-            return null;
-        }
-        return subtrairDiasUteis(primeira, DIAS_UTEIS_CONFIRMACAO);
-    }
-
-    /**
-     * Confirma o agendamento, se ainda estiver no prazo.
-     *
-     * <p>Confirmar exatamente no último dia do prazo é permitido.</p>
-     *
-     * @param hoje data da confirmação
-     * @return {@code true} se confirmou; {@code false} se o prazo passou
-     * @throws IllegalStateException se o agendamento não estiver preliminar
-     */
-    public boolean confirmar(LocalDate hoje) {
-        if (!PRELIMINAR.equals(status)) {
-            throw new IllegalStateException(
-                    "Só um agendamento preliminar pode ser confirmado.");
-        }
-        exigirAulas();
-        if (hoje.isAfter(calcularPrazoConfirmacao())) {
-            return false;
-        }
-        this.status = CONFIRMADO;
-        return true;
-    }
-
-    /**
-     * Cancela o agendamento.
-     *
-     * <p>Se estava confirmado e faltam 3 dias corridos ou mais para a
-     * primeira aula, devolve 50% do preço; senão, nada. Um
-     * agendamento preliminar não foi cobrado e não devolve nada.</p>
-     *
-     * @param hoje data do cancelamento
-     * @return o valor devolvido ao cliente
-     * @throws IllegalStateException se já estiver cancelado
-     */
-    public double cancelar(LocalDate hoje) {
-        if (CANCELADO.equals(status)) {
-            throw new IllegalStateException("O agendamento já está cancelado.");
-        }
-        exigirAulas();
-        double devolver = 0;
-        if (CONFIRMADO.equals(status)) {
-            long dias = ChronoUnit.DAYS.between(hoje, getPrimeiraData());
-            if (dias >= DIAS_PARA_DEVOLUCAO) {
-                devolver = preco * 0.5;
-            }
-        }
-        this.status = CANCELADO;
-        this.valorDevolvido = devolver;
-        return devolver;
-    }
-
-    /**
-     * Cancela o agendamento preliminar cujo prazo de confirmação passou.
-     *
-     * @param hoje data de hoje
-     * @return {@code true} se cancelou
-     */
-    public boolean cancelarSeVencido(LocalDate hoje) {
-        if (aulas.isEmpty()) {
-            return false;
-        }
-        if (PRELIMINAR.equals(status) && hoje.isAfter(calcularPrazoConfirmacao())) {
-            this.status = CANCELADO;
-            return true;
-        }
-        return false;
-    }
-
-    /**
-     * Restaura a situação lida do arquivo JSON.
-     *
-     * <p>Acesso de pacote: só o {@link RepositorioJson} usa, para
-     * recriar um agendamento já confirmado ou cancelado.</p>
-     *
-     * @param novoStatus situação gravada
-     * @param novoValorDevolvido valor devolvido gravado
-     * @throws IllegalArgumentException se a situação ou o valor forem inválidos
-     */
-    void restaurarSituacao(String novoStatus, double novoValorDevolvido) {
-        if (!PRELIMINAR.equals(novoStatus) && !CONFIRMADO.equals(novoStatus)
-                && !CANCELADO.equals(novoStatus)) {
-            throw new IllegalArgumentException("Situação inválida: " + novoStatus);
-        }
-        if (novoValorDevolvido < 0) {
-            throw new IllegalArgumentException(
-                    "O valor devolvido não pode ser negativo.");
-        }
-        this.status = novoStatus;
-        this.valorDevolvido = novoValorDevolvido;
-    }
-
-    /**
-     * Define o identificador de um agendamento criado pelo construtor
-     * padrão. Acesso de pacote; funciona uma única vez.
-     *
-     * @param novoId identificador positivo
-     * @throws IllegalArgumentException se não for positivo
-     * @throws IllegalStateException se já tiver identificador
-     */
-    void definirId(int novoId) {
-        if (this.id != 0) {
-            throw new IllegalStateException(
-                    "O identificador já foi definido.");
-        }
-        if (novoId <= 0) {
-            throw new IllegalArgumentException(
-                    "O identificador deve ser positivo.");
-        }
-        this.id = novoId;
-    }
-
-    /**
-     * Confere se o agendamento tem aulas, necessárias para calcular
-     * prazos.
-     *
-     * @throws IllegalStateException se o agendamento está em branco
-     */
-    private void exigirAulas() {
-        if (aulas.isEmpty()) {
-            throw new IllegalStateException("O agendamento não tem aulas.");
-        }
-    }
-
-    /**
-     * Volta alguns dias úteis (segunda a sexta) a partir de uma data.
-     *
-     * @param data data de partida
-     * @param dias quantidade de dias úteis a voltar
-     * @return a data alcançada
-     */
-    private static LocalDate subtrairDiasUteis(LocalDate data, int dias) {
-        LocalDate atual = data;
-        int restantes = dias;
-        while (restantes > 0) {
-            atual = atual.minusDays(1);
-            DayOfWeek dia = atual.getDayOfWeek();
-            if (dia != DayOfWeek.SATURDAY && dia != DayOfWeek.SUNDAY) {
-                restantes--;
-            }
-        }
-        return atual;
-    }
-
-    /**
-     * Confere se o tipo de cobrança é aceito.
-     *
-     * @param valor tipo informado
-     * @return o próprio {@code valor}, quando válido
-     * @throws IllegalArgumentException se não for DIARIA nem MENSALIDADE
-     */
-    private static String exigirTipoCobranca(String valor) {
-        if (DIARIA.equals(valor) || MENSALIDADE.equals(valor)) {
-            return valor;
-        }
-        throw new IllegalArgumentException(
-                "O tipo de cobrança deve ser DIARIA ou MENSALIDADE.");
-    }
-
-    /**
-     * Confere o número do cartão e remove espaços e traços.
-     *
-     * @param valor número informado
-     * @return só os dígitos
-     * @throws IllegalArgumentException se não tiver de 13 a 19 dígitos
-     */
-    private static String exigirCartao(String valor) {
-        if (valor == null) {
-            throw new IllegalArgumentException("O cartão é obrigatório.");
-        }
-        String digitos = valor.replace(" ", "").replace("-", "");
-        if (!digitos.matches("\\d{13,19}")) {
-            throw new IllegalArgumentException(
-                    "O cartão deve ter de 13 a 19 dígitos.");
-        }
-        return digitos;
-    }
-
-    /**
-     * Retorna uma descrição legível, sem o número completo do cartão.
-     *
-     * @return texto com ID, cliente, tipo, aulas, preço e situação
-     */
-    @Override
-    public String toString() {
-        String nome = (cliente == null) ? "(sem cliente)" : cliente.getNome();
-        return "Agendamento[id=" + id + ", cliente=" + nome
-                + ", tipo=" + tipoCobranca + ", aulas=" + aulas.size()
-                + ", primeira data=" + getPrimeiraData()
-                + ", preço=R$ " + String.format("%.2f", preco)
-                + ", cartão=" + getCartaoMascarado()
-                + ", situação=" + status + "]";
-    }
-}
+    @Override // sobrescreve o toString herdado de Object
+    public String toString() { // texto que representa o agendamento
+        return "Agendamento " + id + " | " + cliente.getNome() + " | " + aulas.size() + " aula(s) | "
+                + tipoCobranca + " | R$ " + String.format("%.2f", preco) + " | cartão " + cartaoMascarado
+                + " | " + status; // ID, cliente, aulas, cobrança, preço, cartão e situação
+    } // fim de toString
+} // fim da classe Agendamento

@@ -4,8 +4,6 @@
  */
 package com.mycompany.academia.milho.verde.model;
 
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Representa um cliente cadastrado na Academia Milho Verde.
@@ -17,231 +15,48 @@ import java.util.List;
  *
  * @author Aline Ferreira
  */
-public class Cliente extends Pessoa {
 
-    /** Endereço informado no cadastro. */
-    private String endereco;
+public class Cliente extends Pessoa { // Cliente É UMA Pessoa: herança
 
-    /**
-     * Telefone de contato.
-     *
-     * <p>Guardado como texto para preservar código de área,
-     * zeros iniciais e símbolos como parênteses e hífen.</p>
-     */
-    private String telefone;
+    private String cpfPseudo; // CPF já pseudo-anonimizado (o original não é guardado)
+    private boolean ativo; // true = ativo; false = desativado (exclusão lógica)
 
-    /**
-     * CPF pseudonimizado do cliente.
-     *
-     * <p>Recebe o resultado do tratamento do CPF feito pelo
-     * sistema, nunca o número original.</p>
-     */
-    private String cpfPseudo;
+    public Cliente() { // construtor sem parâmetros
+        super(); // chama o construtor sem parâmetros da Pessoa 
+        this.cpfPseudo = ""; // ainda sem CPF
+        this.ativo = true; // todo cliente começa ativo
+    } // fim do construtor sem parâmetros
 
-    /**
-     * Extratos das compras do cliente, que formam a conta dele
-     * (item 10).
-     */
-    private List<Extrato> extratos;
-
-    /**
-     * Construtor padrão: cria um cliente em branco.
-     *
-     * <p>{@code super()} cria a parte comum em branco; endereço,
-     * telefone e CPF começam vazios.</p>
-     */
-    public Cliente() {
-        super();
-        // Strings vazias em vez de null evitam NullPointerException
-        // em toString() e em comparações feitas antes do preenchimento.
-        this.endereco = "";
-        this.telefone = "";
-        this.cpfPseudo = "";
-        this.extratos = new ArrayList<>();
-        contarInstancia();
-    }
-
-    /**
-     * Construtor com parâmetros: cria um cliente ativo.
-     *
-     * <p>{@code super(...)} vem na primeira linha e valida o ID, o
-     * nome e o e-mail; depois são validados os dados próprios do
-     * cliente.</p>
-     *
-     * @param novoId identificador positivo do cliente
-     * @param novoNome nome completo do cliente
-     * @param novoEndereco endereço do cliente
-     * @param novoTelefone telefone de contato
-     * @param novoEmail endereço de e-mail
-     * @param novoCpfPseudo CPF já pseudonimizado
-     * @throws IllegalArgumentException se o identificador não for
-     *         positivo ou se algum dado estiver nulo, vazio ou
-     *         contiver apenas espaços
-     */
     public Cliente(int novoId, String novoNome, String novoEndereco,
-                   String novoTelefone, String novoEmail,
-                   String novoCpfPseudo) {
-        // super(...) precisa ser a primeira linha: a Pessoa valida e
-        // guarda o ID, o nome e o e-mail antes dos dados do cliente.
-        super(novoId, novoNome, novoEmail);
+            String novoTelefone, String novoEmail, String novoCpfPseudo) { // construtor com parâmetros
+        super(novoId, novoNome, novoEndereco, novoTelefone, novoEmail); // primeira linha: a Pessoa guarda e valida os dados dela (item 4)
+        setCpfPseudo(novoCpfPseudo); // valida e guarda o CPF
+        this.ativo = true; // todo cliente começa ativo
+    } // fim do construtor com parâmetros
 
-        // Os dados próprios usam a mesma regra herdada de Pessoa.
-        this.endereco = exigirTexto(novoEndereco, "endereço");
-        this.telefone = exigirTexto(novoTelefone, "telefone");
-        this.cpfPseudo = exigirTexto(novoCpfPseudo, "CPF pseudonimizado");
-        this.extratos = new ArrayList<>();
-        contarInstancia();
-    }
+    public String getCpfPseudo() { // getter do CPF
+        return cpfPseudo; // devolve o CPF pseudo-anonimizado
+    } // fim de getCpfPseudo
 
-    /**
-     * Soma 1 nos dois contadores de clientes da classe {@link Sistema}
-     * (itens 11a e 11b). Chamado pelos dois construtores.
-     */
-    private static void contarInstancia() {
-        // Estratégia 1: private static, por get e set.
-        Sistema.setTotalClientes(Sistema.getTotalClientes() + 1);
-        // Estratégia 2: protected static, acesso direto no mesmo pacote.
-        Sistema.totalClientesProtegido++;
-    }
+    public final void setCpfPseudo(String novoCpfPseudo) { // setter final do CPF
+        this.cpfPseudo = Validacao.exigirTexto(novoCpfPseudo, "CPF"); // valida e guarda
+    } // fim de setCpfPseudo
 
-    /**
-     * Retorna o endereço do cliente.
-     *
-     * @return o endereço
-     */
-    public String getEndereco() {
-        return endereco;
-    }
+    public boolean isAtivo() { // getter de boolean usa "is"
+        return ativo; // devolve a situação
+    } // fim de isAtivo
 
-    /**
-     * Retorna o telefone de contato do cliente.
-     *
-     * @return o telefone
-     */
-    public String getTelefone() {
-        return telefone;
-    }
+    public void desativar() { // "excluir cliente" : exclusão lógica
+        this.ativo = false; // desativa sem apagar o histórico
+    } // fim de desativar
 
-    /**
-     * Retorna o CPF pseudonimizado do cliente.
-     *
-     * @return o CPF pseudonimizado, nunca o número original
-     */
-    public String getCpfPseudo() {
-        return cpfPseudo;
-    }
+    public void ativar() { // reativar um cliente desativado
+        this.ativo = true; // volta a ficar ativo
+    } // fim de ativar
 
-    /**
-     * Retorna os extratos das compras do cliente.
-     *
-     * <p>Devolve uma cópia: extratos só entram quando uma venda é
-     * fechada, por {@link Venda#gerarExtrato(int)}.</p>
-     *
-     * @return cópia da lista de extratos
-     */
-    public List<Extrato> getExtratos() {
-        return new ArrayList<>(extratos);
-    }
-
-    /**
-     * Atualiza os dados cadastrais do cliente.
-     *
-     * <p>Todos os dados são validados antes de qualquer alteração.
-     * Se um deles for inválido, nada muda.</p>
-     *
-     * @param novoNome novo nome completo
-     * @param novoEndereco novo endereço
-     * @param novoTelefone novo telefone de contato
-     * @param novoEmail novo e-mail
-     * @param novoCpfPseudo novo CPF já pseudonimizado
-     * @throws IllegalArgumentException se algum dado estiver nulo,
-     *         vazio ou contiver apenas espaços
-     */
-    public void atualizarCadastro(String novoNome, String novoEndereco,
-                                  String novoTelefone, String novoEmail,
-                                  String novoCpfPseudo) {
-        // Valida primeiro os dados do cliente; nome e e-mail são
-        // validados por alterarNomeEmail antes de mudar qualquer coisa.
-        String enderecoValido = exigirTexto(novoEndereco, "endereço");
-        String telefoneValido = exigirTexto(novoTelefone, "telefone");
-        String cpfValido = exigirTexto(novoCpfPseudo, "CPF pseudonimizado");
-
-        alterarNomeEmail(novoNome, novoEmail);
-        this.endereco = enderecoValido;
-        this.telefone = telefoneValido;
-        this.cpfPseudo = cpfValido;
-    }
-
-    /**
-     * Guarda o extrato de uma compra do cliente.
-     *
-     * <p>Tem acesso de pacote: é chamado por
-     * {@link Venda#gerarExtrato(int)} quando a venda é fechada.</p>
-     *
-     * @param extrato extrato de uma venda deste cliente
-     * @throws IllegalArgumentException se o extrato for nulo ou de
-     *         outro cliente
-     */
-    void adicionarExtrato(Extrato extrato) {
-        if (extrato == null) {
-            throw new IllegalArgumentException("O extrato é obrigatório.");
-        }
-        if (extrato.getCliente() != this) {
-            throw new IllegalArgumentException(
-                    "O extrato pertence a outro cliente.");
-        }
-        extratos.add(extrato);
-    }
-
-    /**
-     * Compara este cliente com outro objeto pelo identificador.
-     *
-     * <p>Um cliente ainda sem ID só é igual a ele mesmo.</p>
-     *
-     * @param outro objeto a comparar
-     * @return {@code true} se representarem o mesmo cliente
-     */
-    @Override
-    public boolean equals(Object outro) {
-        // Mesmo objeto na memória: certamente iguais.
-        if (this == outro) {
-            return true;
-        }
-        // instanceof também devolve false quando outro é null.
-        if (!(outro instanceof Cliente)) {
-            return false;
-        }
-        Cliente cliente = (Cliente) outro;
-
-        // Clientes em branco (sem ID) não são considerados iguais
-        // entre si, pois ainda não representam ninguém.
-        if (getId() == SEM_ID) {
-            return false;
-        }
-        return getId() == cliente.getId();
-    }
-
-    /**
-     * Calcula o código hash a partir do ID, coerente com
-     * {@link #equals(Object)}.
-     *
-     * @return o código hash do cliente
-     */
-    @Override
-    public int hashCode() {
-        return Integer.hashCode(getId());
-    }
-
-    /**
-     * Retorna uma descrição legível do cliente, sem o CPF.
-     *
-     * @return texto com ID, nome, telefone, e-mail e situação
-     */
-    @Override
+    @Override // sobrescreve o toString da Pessoa
     public String toString() {
-        // super.toString() traz os dados comuns da Pessoa; o CPF fica
-        // de fora para não expor dado pessoal.
-        return "Cliente[" + super.toString()
-                + ", telefone=" + telefone + "]";
-    }
-}
+        return "Cliente " + super.toString()
+                + " | " + (ativo ? "ativo" : "desativado"); // reaproveita o texto da Pessoa e acrescenta a situação
+    } // fim de toString
+} // fim da classe Cliente

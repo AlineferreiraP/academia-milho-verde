@@ -4,13 +4,15 @@
  */
 package com.mycompany.academia.milho.verde.dao;
 
-// Erro de acesso aos dados (por exemplo, falha ao ler ou gravar o arquivo).
-// É "unchecked": quem usa o DAO não precisa declarar throws.
-public class DaoException extends RuntimeException {
+/**
+ *
+ * @author aline
+ */
+public class DaoException extends RuntimeException { // não verificada: não exige throws
 
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L; // número de versão exigido de toda exceção (é Serializable)
 
-    public DaoException(String mensagem, Throwable causa) {
-        super(mensagem, causa);
-    }
-}
+    public DaoException(String mensagem, Throwable causa) { // recebe a mensagem e o erro original
+        super(mensagem, causa); // exceção encadeada: guarda a causa para não perder o erro real
+    } // fim do construtor
+} // fim da classe DaoException

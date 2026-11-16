@@ -18,134 +18,37 @@ package com.mycompany.academia.milho.verde.model;
  *
  * @author Aline Ferreira
  */
-public abstract class Funcionario extends Pessoa {
 
-    /** Senha de acesso ao sistema; nunca sai da classe. */
-    private String senha;
+public abstract class Funcionario extends Pessoa { // abstrata: ou é Colaborador ou é Administrador
 
-    /**
-     * Construtor padrão: cria um funcionário em branco.
-     *
-     * <p>{@code super()} cria a parte comum em branco; a senha começa
-     * vazia.</p>
-     */
-    public Funcionario() {
-        super();
-        // String vazia em vez de null evita NullPointerException
-        // em verificarSenha() antes de o cadastro ser preenchido.
-        this.senha = "";
-    }
+    private String senha; // senha de acesso (sem getter público nem setter)
 
-    /**
-     * Construtor com parâmetros: cria um funcionário ativo.
-     *
-     * <p>{@code super(...)} vem na primeira linha e valida o ID, o
-     * nome e o e-mail; depois é validada a senha.</p>
-     *
-     * @param novoId identificador positivo do funcionário
-     * @param novoNome nome completo
-     * @param novoEmail e-mail usado no login
-     * @param novaSenha senha de acesso
-     * @throws IllegalArgumentException se o identificador não for
-     *         positivo ou se algum dado estiver nulo, vazio ou
-     *         contiver apenas espaços
-     */
-    public Funcionario(int novoId, String novoNome, String novoEmail,
-                       String novaSenha) {
-        // super(...) precisa ser a primeira linha: a Pessoa valida e
-        // guarda o ID, o nome e o e-mail.
-        super(novoId, novoNome, novoEmail);
+    public Funcionario() { // construtor sem parâmetros
+        super(); // chama o construtor sem parâmetros da Pessoa
+        this.senha = ""; // ainda sem senha
+    } // fim do construtor sem parâmetros
 
-        // A senha usa a mesma regra herdada de Pessoa.
-        this.senha = exigirTexto(novaSenha, "senha");
-    }
+    public Funcionario(int novoId, String novoNome, String novoEndereco,
+            String novoTelefone, String novoEmail, String novaSenha) { // construtor com parâmetros
+        super(novoId, novoNome, novoEndereco, novoTelefone, novoEmail); // primeira linha: dados da Pessoa (item 4)
+        this.senha = Validacao.exigirTexto(novaSenha, "senha"); // senha obrigatória
+    } // fim do construtor com parâmetros
 
-    /**
-     * Altera o nome e o e-mail do funcionário.
-     *
-     * <p>Usa {@code alterarNomeEmail} da {@link Pessoa}, que valida os
-     * dois antes de trocar.</p>
-     *
-     * @param novoNome novo nome completo
-     * @param novoEmail novo e-mail
-     * @throws IllegalArgumentException se algum dado estiver vazio
-     */
-    public void editarDados(String novoNome, String novoEmail) {
-        alterarNomeEmail(novoNome, novoEmail);
-    }
+    public boolean verificarSenha(String senhaInformada) { // usado no login
+        return senha.equals(senhaInformada); // true se a senha digitada for igual à guardada
+    } // fim de verificarSenha
 
-    /**
-     * Confere se a senha informada é a senha do funcionário.
-     *
-     * <p>Usado no login. A senha guardada nunca sai da classe: quem
-     * chama só recebe {@code true} ou {@code false}.</p>
-     *
-     * @param senhaInformada senha digitada no login
-     * @return {@code true} se for igual à senha guardada
-     */
-    public boolean verificarSenha(String senhaInformada) {
-        // Funcionário em branco (sem senha) nunca passa no login.
-        if (senha.isEmpty()) {
-            return false;
-        }
-        // equals compara o conteúdo do texto; devolve false se a
-        // senha informada for null.
-        return senha.equals(senhaInformada);
-    }
+    public boolean alterarSenha(String senhaAtual, String novaSenha) { // troca a senha com segurança
+        if (!verificarSenha(senhaAtual)) { // a senha atual está errada?
+            return false; // não troca nada
+        } // fim do if
+        this.senha = Validacao.exigirTexto(novaSenha, "nova senha"); // valida e guarda a nova senha
+        return true; // troca feita
+    } // fim de alterarSenha
 
-    /**
-     * Troca a senha, exigindo a senha atual.
-     *
-     * @param senhaAtual senha usada hoje
-     * @param novaSenha senha nova
-     * @return {@code true} se a senha foi trocada; {@code false} se a
-     *         senha atual estiver errada
-     * @throws IllegalArgumentException se a nova senha estiver vazia
-     */
-    public boolean alterarSenha(String senhaAtual, String novaSenha) {
-        // Sem a senha atual certa, nada muda.
-        if (senha.equals(senhaAtual)) {
-            // A nova senha segue a regra de campo obrigatório.
-            this.senha = exigirTexto(novaSenha, "senha");
-            return true;
-        }
-        return false;
-    }
+    String getSenha() { // sem modificador = acesso de pacote: só o RepositorioJson usa, para gravar
+        return senha; // devolve a senha
+    } // fim de getSenha
 
-    /**
-     * Retorna a senha para ser gravada no arquivo JSON.
-     *
-     * <p>Tem acesso de pacote (sem modificador): só as classes do
-     * pacote {@code model}, como o {@link RepositorioJson}, podem
-     * chamá-lo. Para as demais classes a senha continua inacessível;
-     * elas só usam {@link #verificarSenha(String)}.</p>
-     *
-     * @return a senha guardada
-     */
-    String getSenha() {
-        return senha;
-    }
-
-    /**
-     * Informa se o funcionário pode usar as despesas e o balanço mensal.
-     *
-     * <p>Método abstrato: cada subclasse responde do seu jeito
-     * (polimorfismo). O colaborador responde {@code false}; o
-     * administrador, {@code true}.</p>
-     *
-     * @return {@code true} se pode acessar o financeiro
-     */
-    public abstract boolean podeAcessarFinanceiro();
-
-    /**
-     * Retorna uma descrição do funcionário, sem a senha.
-     *
-     * @return texto com os dados comuns da pessoa
-     */
-    @Override
-    public String toString() {
-        // super.toString() traz ID, nome, e-mail e situação; a senha
-        // fica de fora.
-        return "Funcionario[" + super.toString() + "]";
-    }
-}
+    public abstract boolean podeAcessarFinanceiro(); // método abstrato, sem corpo: cada subclasse redefine
+} // fim da classe Funcionario
