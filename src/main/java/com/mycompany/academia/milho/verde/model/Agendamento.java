@@ -9,6 +9,7 @@ import java.time.LocalDate; // datas sem hora
 import java.time.temporal.ChronoUnit; // conta dias entre duas datas
 import java.util.ArrayList; // lista que cresce
 import java.util.List; // tipo genérico de lista
+import java.time.LocalDateTime;
 
 public class Agendamento implements Identificavel { // a reserva de um cliente em uma ou mais aulas
 
@@ -92,17 +93,24 @@ public class Agendamento implements Identificavel { // a reserva de um cliente e
         return status; // devolve PRELIMINAR, CONFIRMADO ou CANCELADO
     } // fim de getStatus
 
-    public LocalDate getPrimeiraData() { // dia da aula mais cedo do agendamento
-        LocalDate primeira = aulas.get(0).getDataHora().toLocalDate(); // começa pela primeira da lista
-        for (Aula aula : aulas) { // percorre todas as aulas
-            LocalDate data = aula.getDataHora().toLocalDate(); // dia desta aula
-            if (data.isBefore(primeira)) { // se for antes da que temos
-                primeira = data; // passa a ser a primeira
+       public LocalDateTime getPrimeiraDataHora() { // dia e hora da aula mais cedo do agendamento
+        LocalDateTime primeira = aulas.get(0).getDataHora(); // começa pela primeira da lista
+        IteradorLista<Aula> iterador = new IteradorLista<>(aulas); // nosso iterador percorre as aulas
+        while (iterador.hasNext()) { // enquanto houver aula
+            Aula aula = iterador.next(); // pega a próxima
+            if (aula.getDataHora().isBefore(primeira)) { // se for antes da que temos
+                primeira = aula.getDataHora(); // passa a ser a primeira
             } // fim do if
-        } // fim do for
-        return primeira; // devolve o dia mais cedo
-    } // fim de getPrimeiraData
+        } // fim do while
+        return primeira; // devolve o dia e a hora mais cedo
+    } // fim de getPrimeiraDataHora
 
+    public LocalDate getPrimeiraData() { // só o dia da primeira aula (usado nos prazos)
+        return getPrimeiraDataHora().toLocalDate(); // tira a hora
+    } // fim de getPrimeiraData fim de getPrimeiraData
+    public Sala getSala() { // sala do agendamento
+        return aulas.get(0).getSala(); // todas as aulas são na mesma sala, então a primeira basta
+    } // fim de getSala
     public LocalDate calcularPrazoConfirmacao() { // último dia para o cliente confirmar
         return subtrairDiasUteis(getPrimeiraData(), DIAS_UTEIS_CONFIRMACAO); // 5 dias úteis antes da primeira aula
     } // fim de calcularPrazoConfirmacao
@@ -150,11 +158,12 @@ public class Agendamento implements Identificavel { // a reserva de um cliente e
         if (novasAulas == null || novasAulas.isEmpty()) { // precisa de pelo menos uma aula
             throw new IllegalArgumentException("Escolha pelo menos uma aula."); // erro de argumento
         } // fim do if
-        for (Aula aula : novasAulas) { // percorre a lista
-            if (aula == null) { // nenhuma posição pode estar vazia
+        IteradorLista<Aula> iterador = new IteradorLista<>(novasAulas); // nosso iterador percorre a lista recebida
+        while (iterador.hasNext()) { // enquanto houver posição
+            if (iterador.next() == null) { // nenhuma posição pode estar vazia
                 throw new IllegalArgumentException("Há uma aula inválida na lista."); // erro de argumento
             } // fim do if
-        } // fim do for
+        } // fim do while
         return new ArrayList<>(novasAulas); // guarda uma cópia: mudanças lá fora não afetam o agendamento
     } // fim de exigirAulas
 

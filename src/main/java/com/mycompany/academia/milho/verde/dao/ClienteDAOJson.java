@@ -3,6 +3,7 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
 package com.mycompany.academia.milho.verde.dao; // pacote do DAO
+import com.mycompany.academia.milho.verde.model.IteradorLista; // nosso iterador, usado em todo percurso
 
 import com.mycompany.academia.milho.verde.model.Cliente; // classe guardada no arquivo
 import java.io.BufferedReader; // lê o arquivo linha por linha
@@ -107,9 +108,10 @@ public class ClienteDAOJson implements DAO<Cliente> { // guarda os clientes no a
 
     private void salvar() { // grava todos os clientes da memória no arquivo
         JSONArray lista = new JSONArray(); // lista JSON vazia
-        for (Cliente cliente : memoria.listar()) { // percorre os clientes
-            lista.put(clienteParaJson(cliente)); // converte cada um e acrescenta
-        } // fim do for
+        IteradorLista<Cliente> iterador = new IteradorLista<>(memoria.listar()); // nosso iterador percorre os clientes
+        while (iterador.hasNext()) { // enquanto houver cliente
+            lista.put(clienteParaJson(iterador.next())); // converte o próximo e acrescenta
+        } // fim do while
         gravarTexto(lista.toString(2)); // grava com recuo de 2 espaços (fácil de ler)
     } // fim de salvar
 

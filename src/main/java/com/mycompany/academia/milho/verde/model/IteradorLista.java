@@ -2,7 +2,7 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
-package com.mycompany.academia.milho.verde.dao; // pacote do DAO
+package com.mycompany.academia.milho.verde.model; // pacote do DAO
 
 import java.util.Iterator; // interface do padrão Iterator: hasNext, next e remove
 import java.util.List; // lista que será percorrida

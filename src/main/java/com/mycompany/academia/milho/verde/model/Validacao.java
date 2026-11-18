@@ -8,7 +8,7 @@ package com.mycompany.academia.milho.verde.model;
  *
  * @author aline
  */
-public final class Validacao { // final: ninguém pode herdar desta classe (Aula 9)
+public final class Validacao { // final: ninguém pode herdar desta classe 
 
     private Validacao() { // construtor privado: impede criar objeto com new Validacao()
     } // vazio, porque a classe não guarda dados, só oferece um serviço

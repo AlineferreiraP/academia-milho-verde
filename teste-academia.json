@@ -1,0 +1,109 @@
+{
+  "estoque": [{
+    "preco": 20,
+    "nome": "Toalha",
+    "id": 1,
+    "quantidade": 4
+  }],
+  "agendamentos": [
+    {
+      "preco": 150,
+      "cliente": 1,
+      "tipo": "MENSALIDADE",
+      "cartao": "**** 1111",
+      "aulas": [
+        1,
+        2
+      ],
+      "id": 1,
+      "status": "CANCELADO"
+    },
+    {
+      "preco": 30,
+      "cliente": 1,
+      "tipo": "DIARIA",
+      "cartao": "**** 1111",
+      "aulas": [1],
+      "id": 2,
+      "status": "PRELIMINAR"
+    }
+  ],
+  "pagamentos": [{
+    "valorDevolvido": 75,
+    "id": 1,
+    "dataHora": "2026-11-18T17:27:23.753549935",
+    "agendamento": 1
+  }],
+  "aulas": [
+    {
+      "instrutor": "Rafael",
+      "sala": 1,
+      "id": 1,
+      "dataHora": "2026-12-07T07:00"
+    },
+    {
+      "instrutor": "Rafael",
+      "sala": 1,
+      "id": 2,
+      "dataHora": "2026-12-08T07:00"
+    }
+  ],
+  "registrosCatraca": [{
+    "cliente": 1,
+    "tipo": "ENTRADA",
+    "id": 1,
+    "dataHora": "2026-12-07T06:55"
+  }],
+  "vendas": [{
+    "cliente": 1,
+    "itens": [{
+      "precoUnitario": 20,
+      "produto": 1,
+      "nome": "Toalha",
+      "quantidade": 1
+    }],
+    "id": 1,
+    "dataHora": "2026-11-18T17:27"
+  }],
+  "funcionarios": [
+    {
+      "senha": "Isabella18@",
+      "telefone": "3800000000",
+      "endereco": "Diamantina, MG",
+      "nome": "Aline Ferreira",
+      "id": 1,
+      "email": "aline.pena@ufvjm.edu.br",
+      "perfil": "ADMINISTRADOR"
+    },
+    {
+      "senha": "123",
+      "telefone": "3899990002",
+      "endereco": "Rua B, 2",
+      "nome": "Paulo Lima",
+      "id": 2,
+      "email": "paulo@academia.com",
+      "perfil": "COLABORADOR"
+    }
+  ],
+  "despesas": [{
+    "data": "2026-11-18",
+    "categoria": "LIMPEZA",
+    "valor": 80,
+    "id": 1,
+    "descricao": "Material de limpeza"
+  }],
+  "relatorios": [
+    {
+      "tipo": "LOJINHA",
+      "inicio": "2026-11-18",
+      "vendas": [1],
+      "fim": "2026-11-18"
+    },
+    {
+      "tipo": "DIARIAS_MENSALIDADES",
+      "inicio": "2026-11-18",
+      "vendas": [1],
+      "fim": "2026-11-18"
+    }
+  ]
+}

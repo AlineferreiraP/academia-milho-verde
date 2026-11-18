@@ -1,12 +1,56 @@
 [
-  {"id": 1, "nome": "Ana Souza", "endereco": "Rua das Flores, 10", "telefone": "(38) 99999-0000", "email": "ana@gmail.com", "cpfPseudo": "6604556811088d08", "ativo": true},
-  {"id": 2, "nome": "João Lima", "endereco": "Av. Central, 5", "telefone": "(38) 98888-1111", "email": "joao@gmail.com", "cpfPseudo": "11fc2f60793c0a00", "ativo": true},
-  {"id": 3, "nome": "Carla Mendes", "endereco": "Rua do Rosário, 42", "telefone": "(38) 97777-2222", "email": "carla@gmail.com", "cpfPseudo": "6c74f4e5a3708003", "ativo": true},
-  {"id": 4, "nome": "Pedro Alves", "endereco": "Travessa da Matriz, 3", "telefone": "(31) 96666-3333", "email": "pedro@gmail.com", "cpfPseudo": "8d9436b4e3de0529", "ativo": true},
-  {"id": 5, "nome": "Lúcia Ferreira", "endereco": "Rua Direita, 18", "telefone": "(38) 95555-4444", "email": "lucia@gmail.com", "cpfPseudo": "84c830620941cc50", "ativo": true},
-  {"id": 6, "nome": "Rafael Costa", "endereco": "Rua do Comércio, 7", "telefone": "(11) 94444-5555", "email": "rafael@gmail.com", "cpfPseudo": "a5659e09069a646c", "ativo": true},
-  {"id": 7, "nome": "Juliana Martins", "endereco": "Largo do Rosário, 2", "telefone": "(38) 93333-6666", "email": "juliana@gmail.com", "cpfPseudo": "47ed33098891ee2e", "ativo": true},
-  {"id": 8, "nome": "Thiago Ribeiro", "endereco": "Rua da Cachoeira, 25", "telefone": "(31) 92222-7777", "email": "thiago@gmail.com", "cpfPseudo": "de031d98ec94729d", "ativo": true},
-  {"id": 9, "nome": "Mariana Gomes", "endereco": "Rua São Francisco, 9", "telefone": "(38) 91111-8888", "email": "mariana@gmail.com", "cpfPseudo": "9c2d9ebf468f6d55", "ativo": true},
-  {"id": 10, "nome": "Lucas Pereira", "endereco": "Rua Macau de Baixo, 14", "telefone": "(38) 90000-9999", "email": "lucas@gmail.com", "cpfPseudo": "fbe0cd65fca6c2ca", "ativo": false}
+  {
+    "telefone": "38999991111",
+    "ativo": true,
+    "endereco": "Rua das Flores, 10, Diamantina",
+    "cpfPseudo": "fb800591",
+    "nome": "Ana Souza",
+    "id": 1,
+    "email": "ana.souza@exemplo.com"
+  },
+  {
+    "telefone": "38999992222",
+    "ativo": true,
+    "endereco": "Av. Central, 55, Diamantina",
+    "cpfPseudo": "b77d68f2",
+    "nome": "Bruno Alves",
+    "id": 2,
+    "email": "bruno.alves@exemplo.com"
+  },
+  {
+    "telefone": "38999993333",
+    "ativo": true,
+    "endereco": "Rua do Sol, 7, Diamantina",
+    "cpfPseudo": "737acc53",
+    "nome": "Carla Mendes",
+    "id": 3,
+    "email": "carla.mendes@exemplo.com"
+  },
+  {
+    "telefone": "38999994444",
+    "ativo": true,
+    "endereco": "Rua Nova, 91, Diamantina",
+    "cpfPseudo": "2f782fb4",
+    "nome": "Daniel Reis",
+    "id": 4,
+    "email": "daniel.reis@exemplo.com"
+  },
+  {
+    "telefone": "38999995555",
+    "ativo": true,
+    "endereco": "Praça da Matriz, 3, Diamantina",
+    "cpfPseudo": "eb759315",
+    "nome": "Elisa Prado",
+    "id": 5,
+    "email": "elisa.prado@exemplo.com"
+  },
+  {
+    "telefone": "38999996666",
+    "ativo": true,
+    "endereco": "Rua Bela Vista, 120, Diamantina",
+    "cpfPseudo": "a772f676",
+    "nome": "Fábio Nunes",
+    "id": 6,
+    "email": "fabio.nunes@exemplo.com"
+  }
 ]

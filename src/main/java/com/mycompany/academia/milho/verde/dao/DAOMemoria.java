@@ -4,6 +4,7 @@
  */
 
 package com.mycompany.academia.milho.verde.dao; // pacote do DAO
+import com.mycompany.academia.milho.verde.model.IteradorLista; // nosso iterador, usado em todo percurso
 
 import com.mycompany.academia.milho.verde.model.Identificavel; // só guarda objetos que têm ID
 import java.util.ArrayList; // implementação de lista que cresce sozinha
