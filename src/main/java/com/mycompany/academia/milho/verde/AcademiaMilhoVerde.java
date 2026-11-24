@@ -170,6 +170,7 @@ public class AcademiaMilhoVerde { // classe principal: testes das questões e po
             lojinha.cadastrarProduto("Garrafa 500ml", 15.0, 20); // Produto no Estoque
             agenda.agendar(ana, List.of(aula.getId()), Agendamento.DIARIA, 30.0, "4111111111111111"); // Agendamento da Ana
         } // fim da preparação
+        
 
         // Questao 1
         { // as classes do diagrama: a lista de todas as classes do projeto
@@ -177,6 +178,7 @@ public class AcademiaMilhoVerde { // classe principal: testes das questões e po
             oQueTesta("lista todas as classes do projeto, com o pacote, o tipo e o papel de cada uma."); // explicação
             listarClassesDoProjeto(); // imprime as 40 classes, o pacote, o tipo e o papel de cada uma
         } // fim da Questao 1
+        
 
         // Questao 2
         { // colaboradores e administrador: o que cada perfil pode fazer
@@ -232,6 +234,7 @@ public class AcademiaMilhoVerde { // classe principal: testes das questões e po
             mostrar("AcademiaController", new AcademiaController(sistema, new ConsoleView(), repositorioTeste)); // toString do Controller
         } // fim da Questao 3
 
+        
         // Questao 4
         { // super: as subclasses chamam o construtor e o toString da classe mãe
             titulo("Questão 4 - super"); // título da questão
@@ -247,6 +250,7 @@ public class AcademiaMilhoVerde { // classe principal: testes das questões e po
             esperarErro("funcionário com ID zero", () -> new Colaborador(0, "Sem ID", "Rua", "38", "s@s.com", "x")); // ID inválido
         } // fim da Questao 4
 
+        
         // Questao 5
         { // as 4 salas são static: criadas uma vez só, no Sistema
             titulo("Questão 5 - Salas static"); // título da questão
