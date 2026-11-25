@@ -11,6 +11,8 @@ import java.time.LocalDate; // data sem hora
  *
  * <p>Depois de criada a despesa não muda: todos os atributos são {@code final}.
  * Só o administrador lança despesas, e isso é conferido na {@code GestaoFinanceiro}.</p>
+ *
+ * @author Aline Ferreira
  */
 public class Despesa implements Identificavel { // um gasto da academia
 

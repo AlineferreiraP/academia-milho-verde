@@ -2,11 +2,16 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
+/*
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
+ */
 package com.mycompany.academia.milho.verde.model; // pacote do Model
 
 import com.mycompany.academia.milho.verde.dao.DAO; // interface genérica do DAO: a gestão não sabe onde os clientes ficam
 import com.mycompany.academia.milho.verde.dao.DAOMemoria; // DAO padrão, usado pelo construtor sem parâmetros
 import java.util.ArrayList; // lista que cresce sozinha
+import java.util.Comparator; // critério de comparação usado pelo encontrar
 import java.util.List; // tipo da lista
 
 /**
@@ -168,6 +173,36 @@ public class GestaoClientes { // regras de negócio dos clientes
     public List<Cliente> listarClientes() { // lista todos os clientes
         return dao.listar(); // na ordem em que estão guardados (ordem de ID)
     } // fim de listarClientes
+
+    /**
+     * Questão 20: procura um cliente usando o iterador e um {@link Comparator}.
+     *
+     * <p>Percorre os clientes um a um com o {@link IteradorLista} e devolve o primeiro que o comparador
+     * considera igual à chave (resultado do {@code compare} igual a zero). Como compara um por um,
+     * funciona em qualquer ordem da lista, ao contrário do {@code Collections.binarySearch}, que exige a
+     * lista ordenada pelo mesmo comparador.</p>
+     *
+     * @param chave cliente "modelo": só o atributo usado pelo comparador precisa estar preenchido
+     * @param comparador critério da comparação (por exemplo, {@link ComparadorCliente} por CPF ou por nome)
+     * @return o primeiro cliente igual à chave, ou {@code null} se nenhum for igual
+     * @throws IllegalArgumentException se a chave ou o comparador forem nulos
+     */
+    public Cliente encontrar(Cliente chave, Comparator<Cliente> comparador) { // busca com iterator e comparator
+        if (chave == null) { // sem chave não há o que procurar
+            throw new IllegalArgumentException("Informe o cliente que serve de chave da busca."); // erro de argumento
+        } // fim do if
+        if (comparador == null) { // sem critério não há como comparar
+            throw new IllegalArgumentException("Informe o comparador."); // erro de argumento
+        } // fim do if
+        IteradorLista<Cliente> iterador = new IteradorLista<>(listarClientes()); // nosso iterador percorre os clientes
+        while (iterador.hasNext()) { // enquanto houver cliente
+            Cliente atual = iterador.next(); // pega o próximo
+            if (comparador.compare(atual, chave) == 0) { // o comparador diz que é igual à chave?
+                return atual; // achou: devolve o cliente
+            } // fim do if
+        } // fim do while
+        return null; // percorreu tudo e ninguém é igual à chave
+    } // fim de encontrar
 
     /**
      * Guarda um extrato dentro do cliente a que ele pertence e grava a alteração.

@@ -2,6 +2,10 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
+/*
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
+ */
 package com.mycompany.academia.milho.verde.model; // pacote do Model
 
 import com.mycompany.academia.milho.verde.dao.DAO; // interface genérica do DAO
@@ -37,7 +41,7 @@ public class GestaoVendas { // porta de entrada do subsistema Lojinha
     } // fim do construtor
 
     /**
-     * Cadastra um produto novo na lojinha.
+     * Cadastra um produto novo na lojinha (setor LOJA).
      *
      * @param nome nome do produto
      * @param preco preço de uma unidade (maior que zero)
@@ -46,10 +50,24 @@ public class GestaoVendas { // porta de entrada do subsistema Lojinha
      * @throws IllegalArgumentException se algum dado for inválido
      */
     public Produto cadastrarProduto(String nome, double preco, int quantidade) { // produto novo na lojinha
-        Produto produto = new Produto(estoque.gerarId(), nome, preco, quantidade); // pede o ID e o construtor valida os dados
+        return cadastrarProduto(nome, preco, quantidade, Produto.LOJA); // cadastra no setor da lojinha
+    } // fim de cadastrarProduto
+
+    /**
+     * Cadastra um produto novo num setor (lojinha ou lanchonete).
+     *
+     * @param nome nome do produto
+     * @param preco preço de uma unidade (maior que zero)
+     * @param quantidade estoque inicial (não negativo)
+     * @param setor {@link Produto#LOJA} ou {@link Produto#LANCHONETE}
+     * @return o produto criado
+     * @throws IllegalArgumentException se algum dado ou o setor for inválido
+     */
+    public Produto cadastrarProduto(String nome, double preco, int quantidade, String setor) { // produto novo num setor
+        Produto produto = new Produto(estoque.gerarId(), nome, preco, quantidade, setor); // pede o ID e o construtor valida os dados
         estoque.adicionarProduto(produto); // guarda no estoque
         return produto; // devolve o produto criado
-    } // fim de cadastrarProduto
+    } // fim de cadastrarProduto com setor
 
     /**
      * Tira um produto da lojinha.

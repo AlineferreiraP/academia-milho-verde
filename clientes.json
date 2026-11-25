@@ -1,5 +1,27 @@
 [
   {
+    "extratos": [
+      {
+        "valor": 30,
+        "dataEmissao": "2026-11-25T17:51:56.012366454",
+        "descricao": "Diária de SPINNING (agendamento 1)"
+      },
+      {
+        "valor": 54,
+        "dataEmissao": "2026-11-25T17:51",
+        "descricao": "Lojinha: 2x Garrafa 500ml, 3x Barra de proteína"
+      },
+      {
+        "valor": 22,
+        "dataEmissao": "2026-11-25T17:51",
+        "descricao": "Lanchonete: 1x Suco natural, 2x Pão de queijo"
+      },
+      {
+        "valor": 4,
+        "dataEmissao": "2026-11-25T18:34",
+        "descricao": "Lojinha: 1x Café"
+      }
+    ],
     "telefone": "38999991111",
     "ativo": true,
     "endereco": "Rua das Flores, 10, Diamantina",
@@ -9,6 +31,23 @@
     "email": "ana.souza@exemplo.com"
   },
   {
+    "extratos": [
+      {
+        "valor": 25,
+        "dataEmissao": "2026-11-25T17:51:56.031752828",
+        "descricao": "Diária de SPINNING (agendamento 2)"
+      },
+      {
+        "valor": 40,
+        "dataEmissao": "2026-11-25T17:51",
+        "descricao": "Lojinha: 1x Luva de treino"
+      },
+      {
+        "valor": 15,
+        "dataEmissao": "2026-11-25T18:33",
+        "descricao": "Lojinha: 1x Garrafa 500ml"
+      }
+    ],
     "telefone": "38999992222",
     "ativo": true,
     "endereco": "Av. Central, 55, Diamantina",
@@ -18,6 +57,18 @@
     "email": "bruno.alves@exemplo.com"
   },
   {
+    "extratos": [
+      {
+        "valor": 35,
+        "dataEmissao": "2026-11-25T18:28:46.723586763",
+        "descricao": "Diária de MUSCULACAO (agendamento 3)"
+      },
+      {
+        "valor": -17.5,
+        "dataEmissao": "2026-11-25T00:00",
+        "descricao": "Devolução de 50% (agendamento 3)"
+      }
+    ],
     "telefone": "38999993333",
     "ativo": true,
     "endereco": "Rua do Sol, 7, Diamantina",
@@ -27,6 +78,7 @@
     "email": "carla.mendes@exemplo.com"
   },
   {
+    "extratos": [],
     "telefone": "38999994444",
     "ativo": true,
     "endereco": "Rua Nova, 91, Diamantina",
@@ -36,6 +88,7 @@
     "email": "daniel.reis@exemplo.com"
   },
   {
+    "extratos": [],
     "telefone": "38999995555",
     "ativo": true,
     "endereco": "Praça da Matriz, 3, Diamantina",
@@ -45,6 +98,7 @@
     "email": "elisa.prado@exemplo.com"
   },
   {
+    "extratos": [],
     "telefone": "38999996666",
     "ativo": true,
     "endereco": "Rua Bela Vista, 120, Diamantina",
@@ -52,5 +106,63 @@
     "nome": "Fábio Nunes",
     "id": 6,
     "email": "fabio.nunes@exemplo.com"
+  },
+  {
+    "extratos": [],
+    "telefone": "38999997777",
+    "ativo": true,
+    "endereco": "Rua do Rosário, 14, Diamantina",
+    "cpfPseudo": "637059d7",
+    "nome": "Gabriela Costa",
+    "id": 7,
+    "email": "gabriela.costa@exemplo.com"
+  },
+  {
+    "extratos": [{
+      "valor": 30,
+      "dataEmissao": "2026-11-25T17:51:56.042564849",
+      "descricao": "Diária de SPINNING (agendamento 4)"
+    }],
+    "telefone": "38999998888",
+    "ativo": true,
+    "endereco": "Av. JK, 200, Diamantina",
+    "cpfPseudo": "1f6dbd38",
+    "nome": "Hugo Tavares",
+    "id": 8,
+    "email": "hugo.tavares@exemplo.com"
+  },
+  {
+    "extratos": [{
+      "valor": 22,
+      "dataEmissao": "2026-11-25T17:51",
+      "descricao": "Lanchonete: 2x Café, 1x Sanduíche natural"
+    }],
+    "telefone": "38999990009",
+    "ativo": true,
+    "endereco": "Rua da Glória, 33, Diamantina",
+    "cpfPseudo": "db6b2099",
+    "nome": "Íris Lopes",
+    "id": 9,
+    "email": "iris.lopes@exemplo.com"
+  },
+  {
+    "extratos": [],
+    "telefone": "76234374673",
+    "ativo": false,
+    "endereco": "Avenida do Bibiri, 32, Diamantina",
+    "cpfPseudo": "2c6eddf4",
+    "nome": "Joana Tal",
+    "id": 10,
+    "email": "12345678987"
+  },
+  {
+    "extratos": [],
+    "telefone": "3876543287",
+    "ativo": true,
+    "endereco": "Pedra grande, 23, Diamantina",
+    "cpfPseudo": "ef2d11d1",
+    "nome": "Luana Mendonça",
+    "id": 11,
+    "email": "luana@academia.com"
   }
 ]

@@ -2,6 +2,10 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
+/*
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
+ */
 package com.mycompany.academia.milho.verde.view; // pacote da View
 
 import com.mycompany.academia.milho.verde.model.Extrato; // extrato para imprimir
@@ -10,6 +14,7 @@ import java.time.LocalDate; // data sem hora
 import java.time.LocalDateTime; // data com hora
 import java.time.format.DateTimeFormatter; // formato das datas digitadas
 import java.time.format.DateTimeParseException; // data digitada errada
+import java.time.format.ResolverStyle; // modo estrito: não aceita dia que não existe
 import java.util.ArrayList; // lista que cresce sozinha
 import java.util.List; // tipo da lista
 import java.util.Scanner; // lê o teclado
@@ -24,10 +29,10 @@ import java.util.Scanner; // lê o teclado
  */
 public class ConsoleView { // só lê o teclado e mostra na tela; não tem regra de negócio
 
-    /** Formato das datas digitadas, por exemplo 07/12/2026. */
-    private static final DateTimeFormatter FORMATO_DATA = DateTimeFormatter.ofPattern("dd/MM/yyyy"); // ex.: 07/12/2026
+    /** Formato das datas digitadas, por exemplo 07/12/2026 (estrito: não aceita dia que não existe, como 31/02). */
+    private static final DateTimeFormatter FORMATO_DATA = DateTimeFormatter.ofPattern("d/M/uuuu").withResolverStyle(ResolverStyle.STRICT); // ex.: 07/12/2026 ou 7/12/2026 (STRICT recusa 31/02)
     /** Formato de data e hora digitadas, por exemplo 07/12/2026 07:00. */
-    private static final DateTimeFormatter FORMATO_DATA_HORA = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm"); // ex.: 07/12/2026 07:00
+    private static final DateTimeFormatter FORMATO_DATA_HORA = DateTimeFormatter.ofPattern("d/M/uuuu H:mm").withResolverStyle(ResolverStyle.STRICT); // ex.: 07/12/2026 07:00 ou 7:00 (STRICT recusa 31/02)
 
     /** De onde vem o que o usuário digita. */
     private final Scanner entrada; // de onde vem o que o usuário digita
@@ -141,7 +146,7 @@ public class ConsoleView { // só lê o teclado e mostra na tela; não tem regra
             try { // a conversão pode falhar
                 return LocalDate.parse(lerTexto(rotulo + " (dd/MM/aaaa)"), FORMATO_DATA); // converte e devolve
             } catch (DateTimeParseException erro) { // formato errado
-                mostrarErro("Data inválida."); // avisa e repete
+                mostrarErro("Data inválida. Use dia/mês/ano, por exemplo 26/11/2026."); // avisa e repete
             } // fim do try
         } // fim do while
     } // fim de lerData
@@ -157,7 +162,7 @@ public class ConsoleView { // só lê o teclado e mostra na tela; não tem regra
             try { // a conversão pode falhar
                 return LocalDateTime.parse(lerTexto(rotulo + " (dd/MM/aaaa HH:mm)"), FORMATO_DATA_HORA); // converte
             } catch (DateTimeParseException erro) { // formato errado
-                mostrarErro("Data e hora inválidas."); // avisa e repete
+                mostrarErro("Data e hora inválidas. Digite a data e a hora, por exemplo 26/11/2026 07:00."); // avisa e repete
             } // fim do try
         } // fim do while
     } // fim de lerDataHora

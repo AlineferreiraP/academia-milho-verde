@@ -17,6 +17,8 @@ import java.util.List; // tipo da lista
  *
  * <p>O cliente apenas "passa" pela catraca; ela decide se a passagem é uma
  * ENTRADA (cliente estava fora) ou uma SAIDA (cliente estava dentro).</p>
+ *
+ * @author Aline Ferreira
  */
 public class Catraca { // porta de entrada do subsistema Catraca: registra entradas e saídas
 

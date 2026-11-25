@@ -1,4 +1,21 @@
 [{
+  "extratos": [
+    {
+      "valor": 20,
+      "dataEmissao": "2026-11-25T18:40",
+      "descricao": "Lojinha: 1x Toalha"
+    },
+    {
+      "valor": 150,
+      "dataEmissao": "2026-11-25T18:40:01.909245579",
+      "descricao": "Mensalidade de SPINNING (agendamento 1)"
+    },
+    {
+      "valor": -75,
+      "dataEmissao": "2026-11-25T00:00",
+      "descricao": "Devolução de 50% (agendamento 1)"
+    }
+  ],
   "telefone": "3897770000",
   "ativo": true,
   "endereco": "Rua E, 5",

@@ -1,10 +1,20 @@
 {
-  "estoque": [{
-    "preco": 20,
-    "nome": "Toalha",
-    "id": 1,
-    "quantidade": 4
-  }],
+  "estoque": [
+    {
+      "preco": 20,
+      "setor": "LOJA",
+      "nome": "Toalha",
+      "id": 1,
+      "quantidade": 4
+    },
+    {
+      "preco": 6,
+      "setor": "LANCHONETE",
+      "nome": "Pão de queijo",
+      "id": 2,
+      "quantidade": 15
+    }
+  ],
   "agendamentos": [
     {
       "preco": 150,
@@ -31,7 +41,7 @@
   "pagamentos": [{
     "valorDevolvido": 75,
     "id": 1,
-    "dataHora": "2026-11-18T17:27:23.753549935",
+    "dataHora": "2026-11-25T18:40:01.909245579",
     "agendamento": 1
   }],
   "aulas": [
@@ -39,20 +49,20 @@
       "instrutor": "Rafael",
       "sala": 1,
       "id": 1,
-      "dataHora": "2026-12-07T07:00"
+      "dataHora": "2026-12-14T07:00"
     },
     {
       "instrutor": "Rafael",
       "sala": 1,
       "id": 2,
-      "dataHora": "2026-12-08T07:00"
+      "dataHora": "2026-12-15T07:00"
     }
   ],
   "registrosCatraca": [{
     "cliente": 1,
     "tipo": "ENTRADA",
     "id": 1,
-    "dataHora": "2026-12-07T06:55"
+    "dataHora": "2026-12-14T06:55"
   }],
   "vendas": [{
     "cliente": 1,
@@ -63,7 +73,7 @@
       "quantidade": 1
     }],
     "id": 1,
-    "dataHora": "2026-11-18T17:27"
+    "dataHora": "2026-11-25T18:40"
   }],
   "funcionarios": [
     {
@@ -86,7 +96,7 @@
     }
   ],
   "despesas": [{
-    "data": "2026-11-18",
+    "data": "2026-11-25",
     "categoria": "LIMPEZA",
     "valor": 80,
     "id": 1,
@@ -95,15 +105,15 @@
   "relatorios": [
     {
       "tipo": "LOJINHA",
-      "inicio": "2026-11-18",
+      "inicio": "2026-11-25",
       "vendas": [1],
-      "fim": "2026-11-18"
+      "fim": "2026-11-25"
     },
     {
       "tipo": "DIARIAS_MENSALIDADES",
-      "inicio": "2026-11-18",
+      "inicio": "2026-11-25",
       "vendas": [1],
-      "fim": "2026-11-18"
+      "fim": "2026-11-25"
     }
   ]
 }

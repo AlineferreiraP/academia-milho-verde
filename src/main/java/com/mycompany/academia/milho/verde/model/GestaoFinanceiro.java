@@ -17,6 +17,8 @@ import java.util.List; // tipo da lista
  * <p>Os relatórios de vendas podem ser gerados por qualquer funcionário logado.
  * As despesas e o balanço exigem um {@link Administrador}: a conferência usa
  * {@link Funcionario#podeAcessarFinanceiro()}, que cada perfil responde do seu jeito.</p>
+ *
+ * @author Aline Ferreira
  */
 public class GestaoFinanceiro { // relatórios de vendas, despesas e balanço mensal
 

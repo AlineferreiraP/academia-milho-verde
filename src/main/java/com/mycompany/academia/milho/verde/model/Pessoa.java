@@ -5,15 +5,28 @@
 package com.mycompany.academia.milho.verde.model;
 
 
+/**
+ * Pessoa da academia (cliente, funcionário ou instrutor).
+ * É abstrata: não se cria uma pessoa solta, só as subclasses. Guarda os dados em comum e valida cada um deles.
+ *
+ * @author Aline Ferreira
+ */
 public abstract class Pessoa implements Identificavel { // abstrata: não se cria uma "pessoa" solta; tem ID, então é Identificavel
+    /** Valor de quem ainda não tem ID. */
     private static final int SEM_ID = 0; // constante da classe: valor de quem ainda não tem ID 
 
+    /** Identificador único; recebe valor uma só vez, no construtor. */
     private final int id; // final: recebe valor uma única vez, no construtor 
+    /** Nome completo. */
     private String nome; // nome completo
+    /** Endereço. */
     private String endereco; // endereço
+    /** Telefone de contato. */
     private String telefone; // telefone de contato
+    /** E-mail de contato. */
     private String email; // e-mail de contato
 
+    /** Cria uma pessoa vazia, ainda sem ID. */
     public Pessoa() { // construtor sem parâmetros 
         this.id = SEM_ID; // ainda sem ID
         this.nome = ""; // texto vazio, direto no atributo (o setter recusaria vazio)
@@ -22,6 +35,16 @@ public abstract class Pessoa implements Identificavel { // abstrata: não se cri
         this.email = ""; // idem
     } // fim do construtor sem parâmetros
 
+    /**
+     * Cria uma pessoa validando todos os dados.
+     *
+     * @param novoId ID da pessoa (maior que zero)
+     * @param novoNome nome completo (não pode ser vazio)
+     * @param novoEndereco endereço (não pode ser vazio)
+     * @param novoTelefone telefone (não pode ser vazio)
+     * @param novoEmail e-mail (não pode ser vazio)
+     * @throws IllegalArgumentException se o ID ou algum texto for inválido
+     */
     public Pessoa(int novoId, String novoNome, String novoEndereco,
             String novoTelefone, String novoEmail) { // construtor com parâmetros; prefixo "novo" evita sombrear 
         if (novoId <= SEM_ID) { // ID precisa ser maior que zero
@@ -34,42 +57,96 @@ public abstract class Pessoa implements Identificavel { // abstrata: não se cri
         setEmail(novoEmail); // idem
     } // fim do construtor com parâmetros
 
+    /**
+     * Devolve: nome da pessoa.
+     *
+     * @return nome da pessoa
+     */
     public String getNome() { // getter do nome
         return nome; // devolve o nome
     } // fim de getNome
 
+    /**
+     * Troca o nome. É final: as subclasses não mudam a validação.
+     *
+     * @param novoNome novo nome (não pode ser vazio)
+     * @throws IllegalArgumentException se o texto for vazio
+     */
     public final void setNome(String novoNome) { // final: subclasse não muda a validação (Aula 9)
         this.nome = Validacao.exigirTexto(novoNome, "nome"); // valida e guarda
     } // fim de setNome
 
+    /**
+     * Devolve: endereço da pessoa.
+     *
+     * @return endereço da pessoa
+     */
     public String getEndereco() { // getter do endereço
         return endereco; // devolve o endereço
     } // fim de getEndereco
 
+    /**
+     * Troca o endereço. É final: as subclasses não mudam a validação.
+     *
+     * @param novoEndereco novo endereço (não pode ser vazio)
+     * @throws IllegalArgumentException se o texto for vazio
+     */
     public final void setEndereco(String novoEndereco) { // setter final do endereço
         this.endereco = Validacao.exigirTexto(novoEndereco, "endereço"); // valida e guarda
     } // fim de setEndereco
 
+    /**
+     * Devolve: telefone da pessoa.
+     *
+     * @return telefone da pessoa
+     */
     public String getTelefone() { // getter do telefone
         return telefone; // devolve o telefone
     } // fim de getTelefone
 
+    /**
+     * Troca o telefone. É final: as subclasses não mudam a validação.
+     *
+     * @param novoTelefone novo telefone (não pode ser vazio)
+     * @throws IllegalArgumentException se o texto for vazio
+     */
     public final void setTelefone(String novoTelefone) { // setter final do telefone
         this.telefone = Validacao.exigirTexto(novoTelefone, "telefone"); // valida e guarda
     } // fim de setTelefone
 
+    /**
+     * Devolve: e-mail da pessoa.
+     *
+     * @return e-mail da pessoa
+     */
     public String getEmail() { // getter do e-mail
         return email; // devolve o e-mail
     } // fim de getEmail
+    /**
+     * Troca o e-mail. É final: as subclasses não mudam a validação.
+     *
+     * @param novoEmail novo e-mail (não pode ser vazio)
+     * @throws IllegalArgumentException se o texto for vazio
+     */
     public final void setEmail(String novoEmail) { // setter final do e-mail
         this.email = Validacao.exigirTexto(novoEmail, "e-mail"); // valida e guarda
     } // fim de setEmail
 
+    /**
+     * Resume a pessoa em uma linha.
+     *
+     * @return ID, nome, endereço, telefone e e-mail
+     */
     @Override // sobrescreve o toString herdado de Object
     public String toString() { // texto que representa a pessoa 
         return "ID " + id + " | " + nome + " | " + endereco
                 + " | " + telefone + " | " + email; // junta os cinco dados em uma linha
     } // fim de toString
+    /**
+     * Devolve o ID. Não existe setter: o ID nunca muda.
+     *
+     * @return ID da pessoa
+     */
     @Override // implementa o método da interface Identificavel
     public int getId() { // getter do ID (não existe setter)
         return id; // devolve o ID

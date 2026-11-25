@@ -12,6 +12,8 @@ import java.util.List; // tipo da lista
  * (número de vendas, ticket médio e número de acessos pela catraca).
  *
  * <p>Os números só aparecem depois de chamar {@link #calcular(List, List, List)}.</p>
+ *
+ * @author Aline Ferreira
  */
 public class BalancoMensal { // receitas, despesas e estatísticas básicas de um mês
 

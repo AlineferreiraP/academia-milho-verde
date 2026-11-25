@@ -119,15 +119,29 @@ public class AcademiaController { // liga a tela (View) às regras (Model)
         int opcao = -1; // opção escolhida
         while (opcao != 0) { // até escolher sair
             opcao = view.mostrarMenu("MENU PRINCIPAL", new String[]{"1 - Clientes", "2 - Agenda", "3 - Lojinha",
-                "4 - Relatórios", "5 - Financeiro (administrador)", "6 - Funcionários (administrador)", "0 - Sair"}); // opções
+                "4 - Relatórios", "5 - Financeiro (administrador)", "6 - Funcionários (administrador)", "7 - Lanchonete",
+                "0 - Sair"}); // opções
             try { // qualquer regra pode recusar a operação
                 switch (opcao) { // escolhe o submenu
-                    case 1 -> menuClientes(); // clientes
-                    case 2 -> menuAgenda(); // agenda
-                    case 3 -> menuLoja(); // lojinha
-                    case 4 -> menuRelatorios(); // relatórios
-                    case 5 -> menuFinanceiro(); // financeiro
-                    case 6 -> menuFuncionarios(); // funcionários
+                    case 1 -> repetirSubmenu(this::menuClientes); // clientes
+                    case 2 -> repetirSubmenu(this::menuAgenda); // agenda
+                    case 3 -> repetirSubmenu(this::menuLoja); // lojinha
+                    case 4 -> repetirSubmenu(this::menuRelatorios); // relatórios
+                    case 5 -> { // financeiro: só o administrador entra
+                        if (sistema.isAdministradorLogado()) { // confere o perfil
+                            repetirSubmenu(this::menuFinanceiro); // financeiro
+                        } else { // colaborador
+                            view.mostrarMensagem("Acesso negado: apenas o administrador acessa o financeiro."); // avisa
+                        } // fim do if
+                    } // fim do case 5
+                    case 6 -> { // funcionários: só o administrador entra
+                        if (sistema.isAdministradorLogado()) { // confere o perfil
+                            repetirSubmenu(this::menuFuncionarios); // funcionários
+                        } else { // colaborador
+                            view.mostrarMensagem("Acesso negado: apenas o administrador gerencia funcionários."); // avisa
+                        } // fim do if
+                    } // fim do case 6
+                    case 7 -> repetirSubmenu(this::menuLanchonete); // lanchonete
                     default -> { } // 0 sai; outro número só repete o menu
                 } // fim do switch
             } catch (IllegalArgumentException | IllegalStateException | DaoException erro) { // regra recusou
@@ -137,12 +151,34 @@ public class AcademiaController { // liga a tela (View) às regras (Model)
     } // fim de executarMenuPrincipal
 
     /**
-     * Menu dos clientes: cadastrar, editar, remover, reativar, buscar, listar e emitir a conta.
+     * Mantém um submenu aberto: depois de cada ação ele aparece de novo, até a pessoa escolher voltar.
+     * Se uma regra recusar a ação, mostra o motivo e continua no mesmo submenu.
+     *
+     * @param submenu o submenu, que devolve {@code false} quando a pessoa escolhe voltar
      */
-    private void menuClientes() { // CRUD de clientes
+    private void repetirSubmenu(java.util.function.BooleanSupplier submenu) { // repete o submenu
+        boolean continua = true; // começa dentro do submenu
+        while (continua) { // até escolher voltar
+            try { // uma regra pode recusar a ação
+                continua = submenu.getAsBoolean(); // mostra o submenu e executa a opção
+            } catch (IllegalArgumentException | IllegalStateException | DaoException erro) { // regra recusou
+                view.mostrarErro(erro.getMessage()); // mostra o motivo e continua no submenu
+            } // fim do try
+        } // fim do while
+    } // fim de repetirSubmenu
+
+    /**
+     * Menu dos clientes: cadastrar, editar, remover, reativar, buscar, listar e emitir a conta.
+     *
+     * @return {@code true} para continuar no submenu; {@code false} quando a pessoa escolhe voltar
+     */
+    private boolean menuClientes() { // CRUD de clientes
         GestaoClientes gestao = sistema.getGestaoClientes(); // exige login
         int opcao = view.mostrarMenu("CLIENTES", new String[]{"1 - Cadastrar", "2 - Editar", "3 - Remover",
             "4 - Reativar", "5 - Buscar por ID", "6 - Buscar por nome", "7 - Listar", "8 - Emitir conta", "0 - Voltar"}); // opções
+        if (opcao == 0) { // 0 volta ao menu principal
+            return false; // sai do submenu
+        } // fim do if
         switch (opcao) { // executa a opção
             case 1 -> view.mostrarMensagem("Cadastrado: " + gestao.cadastrarCliente(view.lerTexto("Nome"),
                     view.lerTexto("Endereço"), view.lerTexto("Telefone"), view.lerTexto("E-mail"), view.lerTexto("CPF"))); // cadastra
@@ -165,6 +201,7 @@ public class AcademiaController { // liga a tela (View) às regras (Model)
             case 8 -> emitirConta(gestao); // conta do cliente
             default -> { } // voltar
         } // fim do switch
+        return true; // continua no mesmo submenu
     } // fim de menuClientes
 
     /**
@@ -183,13 +220,18 @@ public class AcademiaController { // liga a tela (View) às regras (Model)
 
     /**
      * Menu da agenda: aulas, vagas, agendar, confirmar, cancelar e listar.
+     *
+     * @return {@code true} para continuar no submenu; {@code false} quando a pessoa escolhe voltar
      */
-    private void menuAgenda() { // aulas e agendamentos
+    private boolean menuAgenda() { // aulas e agendamentos
         GestaoAgendamentos gestao = sistema.getGestaoAgendamentos(); // exige login
         int opcao = view.mostrarMenu("AGENDA", new String[]{"1 - Cadastrar aula", "2 - Listar aulas",
             "3 - Agenda da semana", "4 - Verificar vagas", "5 - Agendar", "6 - Confirmar agendamento",
             "7 - Cancelar agendamento", "8 - Cancelar vencidos", "9 - Próximo agendamento do cliente",
             "10 - Listar agendamentos", "0 - Voltar"}); // opções
+        if (opcao == 0) { // 0 volta ao menu principal
+            return false; // sai do submenu
+        } // fim do if
         switch (opcao) { // executa a opção
             case 1 -> view.mostrarMensagem("Cadastrada: " + gestao.cadastrarAula(
                     view.lerInteiro("Sala (1 Spinning, 2 Musculação, 3 Fit Dance, 4 Pilates)"),
@@ -212,6 +254,7 @@ public class AcademiaController { // liga a tela (View) às regras (Model)
             default -> { } // voltar
         } // fim do switch
         salvarDados(); // grava aulas, agendamentos e pagamentos
+        return true; // continua no mesmo submenu
     } // fim de menuAgenda
 
     /**
@@ -234,51 +277,96 @@ public class AcademiaController { // liga a tela (View) às regras (Model)
 
     /**
      * Menu da lojinha: cadastrar, remover, verificar, repor, vender e listar. Os produtos são escolhidos pelo ID mostrado na lista.
+     *
+     * @return {@code true} para continuar no submenu; {@code false} quando a pessoa escolhe voltar
      */
-    private void menuLoja() { // lojinha
+    private boolean menuLoja() { // lojinha
         GestaoVendas gestao = sistema.getGestaoVendas(); // exige login
         int opcao = view.mostrarMenu("LOJINHA", new String[]{"1 - Cadastrar produto", "2 - Remover produto",
             "3 - Verificar produto", "4 - Repor estoque", "5 - Registrar venda", "6 - Listar produtos", "0 - Voltar"}); // opções
+        if (opcao == 0) { // 0 volta ao menu principal
+            return false; // sai do submenu
+        } // fim do if
         switch (opcao) { // executa a opção
             case 1 -> view.mostrarMensagem("Cadastrado: " + gestao.cadastrarProduto(view.lerTexto("Nome"),
                     view.lerDecimal("Preço"), view.lerInteiro("Quantidade"))); // cadastra
             case 2 -> { // remove
-                Produto produto = escolherProdutoDaLista(gestao); // mostra a lista e acha o produto pelo número
+                Produto produto = escolherProdutoDaLista(gestao, Produto.LOJA); // mostra a lista e acha o produto pelo ID
                 if (produto != null) { // o usuário escolheu um produto?
                     gestao.removerProduto(produto.getId()); // tira do estoque
                     view.mostrarMensagem("Produto removido: " + produto.getNome()); // confirma
                 } // fim do if
             } // fim do case 2
             case 3 -> { // consulta
-                Produto produto = escolherProdutoDaLista(gestao); // mostra a lista e acha o produto pelo número
+                Produto produto = escolherProdutoDaLista(gestao, Produto.LOJA); // mostra a lista e acha o produto pelo ID
                 if (produto != null) { // o usuário escolheu um produto?
                     view.mostrarMensagem(String.valueOf(gestao.verificarProduto(produto.getId()))); // mostra o produto
                 } // fim do if
             } // fim do case 3
             case 4 -> { // repõe
-                Produto produto = escolherProdutoDaLista(gestao); // mostra a lista e acha o produto pelo número
+                Produto produto = escolherProdutoDaLista(gestao, Produto.LOJA); // mostra a lista e acha o produto pelo ID
                 if (produto != null) { // o usuário escolheu um produto?
                     gestao.reporEstoque(produto.getId(), view.lerInteiro("Quantidade que chegou")); // soma
                     view.mostrarMensagem("Estoque atualizado: " + gestao.verificarProduto(produto.getId())); // confirma
                 } // fim do if
             } // fim do case 4
-            case 5 -> registrarVendaProdutos(gestao); // vende
-            case 6 -> view.mostrarLista("Produtos", gestao.getEstoque().getProdutos()); // lista
+            case 5 -> registrarVendaProdutos(gestao, Produto.LOJA); // vende
+            case 6 -> view.mostrarLista("Produtos", gestao.getEstoque().listarPorSetor(Produto.LOJA)); // lista só a lojinha
             default -> { } // voltar
         } // fim do switch
         salvarDados(); // grava o estoque e as vendas
+        return true; // continua no mesmo submenu
     } // fim de menuLoja
 
     /**
-     * Registra uma venda da lojinha: mostra primeiro a lista de produtos com o ID de cada um, pede o cliente
-     * e depois o ID de cada produto e a quantidade. Se faltar estoque, pergunta se vende o que
-     * há ou retira o item.
+     * Menu da lanchonete: cadastrar item, ver o cardápio, repor e vender. Usa o mesmo estoque e as mesmas
+     * vendas da lojinha; só mostra os produtos do setor LANCHONETE. Os itens são escolhidos pelo ID mostrado na lista.
+     *
+     * @return {@code true} para continuar no submenu; {@code false} quando a pessoa escolhe voltar
+     */
+    private boolean menuLanchonete() { // lanchonete
+        GestaoVendas gestao = sistema.getGestaoVendas(); // exige login; o mesmo estoque da lojinha
+        int opcao = view.mostrarMenu("LANCHONETE", new String[]{"1 - Cadastrar item", "2 - Ver cardápio",
+            "3 - Repor estoque", "4 - Registrar venda", "0 - Voltar"}); // opções
+        if (opcao == 0) { // 0 volta ao menu principal
+            return false; // sai do submenu
+        } // fim do if
+        switch (opcao) { // executa a opção
+            case 1 -> view.mostrarMensagem("Cadastrado: " + gestao.cadastrarProduto(view.lerTexto("Nome"),
+                    view.lerDecimal("Preço"), view.lerInteiro("Quantidade"), Produto.LANCHONETE)); // cadastra na lanchonete
+            case 2 -> { // cardápio
+                List<Produto> cardapio = gestao.getEstoque().listarPorSetor(Produto.LANCHONETE); // itens da lanchonete
+                if (cardapio.isEmpty()) { // ainda não tem itens?
+                    view.mostrarErro("Nenhum item cadastrado na lanchonete."); // avisa
+                } else { // tem itens
+                    mostrarProdutosComId(cardapio); // ID, nome, preço e estoque
+                } // fim do if
+            } // fim do case 2
+            case 3 -> { // repõe
+                Produto produto = escolherProdutoDaLista(gestao, Produto.LANCHONETE); // mostra o cardápio e acha o item pelo ID
+                if (produto != null) { // o usuário escolheu um item?
+                    gestao.reporEstoque(produto.getId(), view.lerInteiro("Quantidade que chegou")); // soma
+                    view.mostrarMensagem("Estoque atualizado: " + gestao.verificarProduto(produto.getId())); // confirma
+                } // fim do if
+            } // fim do case 3
+            case 4 -> registrarVendaProdutos(gestao, Produto.LANCHONETE); // vende
+            default -> { } // voltar
+        } // fim do switch
+        salvarDados(); // grava o estoque e as vendas
+        return true; // continua no mesmo submenu
+    } // fim de menuLanchonete
+
+    /**
+     * Registra uma venda de produtos (lojinha ou lanchonete): mostra primeiro a lista do setor com o ID de cada
+     * produto, pede o cliente e depois o ID de cada produto e a quantidade. Se faltar estoque, pergunta se vende
+     * o que há ou retira o item.
      *
      * @param gestao as regras da lojinha
+     * @param setor {@link Produto#LOJA} ou {@link Produto#LANCHONETE}
      */
-    private void registrarVendaProdutos(GestaoVendas gestao) { // venda escolhendo os produtos pelo ID mostrado na lista
-        List<Produto> produtos = gestao.getEstoque().getProdutos(); // produtos à venda
-        if (produtos.isEmpty()) { // lojinha vazia?
+    private void registrarVendaProdutos(GestaoVendas gestao, String setor) { // venda escolhendo os produtos pelo ID mostrado na lista
+        List<Produto> produtos = gestao.getEstoque().listarPorSetor(setor); // produtos à venda neste setor
+        if (produtos.isEmpty()) { // setor vazio?
             view.mostrarErro("Nenhum produto cadastrado."); // avisa
             return; // nada a vender
         } // fim do if
@@ -320,13 +408,14 @@ public class AcademiaController { // liga a tela (View) às regras (Model)
     } // fim de registrarVendaProdutos
 
     /**
-     * Mostra a lista de produtos com o ID de cada um e pede o ID de um deles.
+     * Mostra a lista de produtos de um setor com o ID de cada um e pede o ID de um deles.
      *
      * @param gestao as regras da lojinha
+     * @param setor {@link Produto#LOJA} ou {@link Produto#LANCHONETE}
      * @return o produto escolhido, ou {@code null} se não há produtos ou o ID não está na lista
      */
-    private Produto escolherProdutoDaLista(GestaoVendas gestao) { // lista com ID e escolha pelo ID
-        List<Produto> produtos = gestao.getEstoque().getProdutos(); // produtos à venda
+    private Produto escolherProdutoDaLista(GestaoVendas gestao, String setor) { // lista com ID e escolha pelo ID
+        List<Produto> produtos = gestao.getEstoque().listarPorSetor(setor); // produtos do setor
         if (produtos.isEmpty()) { // lojinha vazia?
             view.mostrarErro("Nenhum produto cadastrado."); // avisa
             return null; // sem produto
@@ -416,12 +505,18 @@ public class AcademiaController { // liga a tela (View) às regras (Model)
 
     /**
      * Menu dos relatórios: vendas, pagamentos, catraca, dados dos clientes e relatórios já gerados.
+     *
+     * @return {@code true} para continuar no submenu; {@code false} quando a pessoa escolhe voltar
      */
-    private void menuRelatorios() { // relatórios para qualquer funcionário
+    private boolean menuRelatorios() { // relatórios para qualquer funcionário
         GestaoFinanceiro financeiro = sistema.getGestaoFinanceiro(); // exige login
-        int opcao = view.mostrarMenu("RELATÓRIOS", new String[]{"1 - Vendas da lojinha do dia", "2 - Vendas da lojinha do mês",
+        int opcao = view.mostrarMenu("RELATÓRIOS", new String[]{"1 - Vendas da lojinha e lanchonete do dia",
+            "2 - Vendas da lojinha e lanchonete do mês",
             "3 - Diárias e mensalidades do dia", "4 - Diárias e mensalidades do mês", "5 - Catraca do dia",
             "6 - Catraca do mês", "7 - Catraca do ano", "8 - Dados dos clientes", "9 - Relatórios já gerados", "0 - Voltar"}); // opções
+        if (opcao == 0) { // 0 volta ao menu principal
+            return false; // sai do submenu
+        } // fim do if
         switch (opcao) { // executa a opção
             case 1 -> view.mostrarMensagem(financeiro.gerarRelatorioVendasDia(view.lerData("Dia")).toString()); // lojinha dia
             case 2 -> view.mostrarMensagem(financeiro.gerarRelatorioVendasMes(view.lerInteiro("Ano"),
@@ -438,15 +533,21 @@ public class AcademiaController { // liga a tela (View) às regras (Model)
             default -> { } // voltar
         } // fim do switch
         salvarDados(); // grava os relatórios gerados
+        return true; // continua no mesmo submenu
     } // fim de menuRelatorios
 
     /**
      * Menu do financeiro: lançar, remover e listar despesas e ver o balanço (só o administrador).
+     *
+     * @return {@code true} para continuar no submenu; {@code false} quando a pessoa escolhe voltar
      */
-    private void menuFinanceiro() { // despesas e balanço: só administrador (a GestaoFinanceiro confere)
+    private boolean menuFinanceiro() { // despesas e balanço: só administrador (a GestaoFinanceiro confere)
         GestaoFinanceiro financeiro = sistema.getGestaoFinanceiro(); // exige login
         int opcao = view.mostrarMenu("FINANCEIRO", new String[]{"1 - Lançar despesa", "2 - Remover despesa",
             "3 - Listar despesas", "4 - Balanço mensal", "0 - Voltar"}); // opções
+        if (opcao == 0) { // 0 volta ao menu principal
+            return false; // sai do submenu
+        } // fim do if
         switch (opcao) { // executa a opção
             case 1 -> view.mostrarMensagem("Lançada: " + financeiro.cadastrarDespesa(sistema.getUsuarioLogado(),
                     view.lerTexto("Descrição"), categoriaDespesa(view.lerInteiro("1 Limpeza, 2 Funcionários, 3 Material, 4 Outros")),
@@ -461,6 +562,7 @@ public class AcademiaController { // liga a tela (View) às regras (Model)
             default -> { } // voltar
         } // fim do switch
         salvarDados(); // grava as despesas
+        return true; // continua no mesmo submenu
     } // fim de menuFinanceiro
 
     /**
@@ -480,11 +582,16 @@ public class AcademiaController { // liga a tela (View) às regras (Model)
 
     /**
      * Menu dos funcionários: cadastrar, editar, remover, alterar senha e listar (só o administrador).
+     *
+     * @return {@code true} para continuar no submenu; {@code false} quando a pessoa escolhe voltar
      */
-    private void menuFuncionarios() { // só administrador
+    private boolean menuFuncionarios() { // só administrador
         GestaoFuncionarios gestao = sistema.getGestaoFuncionarios(); // exige administrador
         int opcao = view.mostrarMenu("FUNCIONÁRIOS", new String[]{"1 - Cadastrar colaborador", "2 - Cadastrar administrador",
             "3 - Editar", "4 - Remover", "5 - Alterar senha", "6 - Listar", "0 - Voltar"}); // opções
+        if (opcao == 0) { // 0 volta ao menu principal
+            return false; // sai do submenu
+        } // fim do if
         switch (opcao) { // executa a opção
             case 1 -> view.mostrarMensagem("Cadastrado: " + gestao.cadastrarColaborador(view.lerTexto("Nome"),
                     view.lerTexto("Endereço"), view.lerTexto("Telefone"), view.lerTexto("E-mail"), view.lerTexto("Senha"))); // colaborador
@@ -505,6 +612,7 @@ public class AcademiaController { // liga a tela (View) às regras (Model)
             default -> { } // voltar
         } // fim do switch
         salvarDados(); // grava os funcionários
+        return true; // continua no mesmo submenu
     } // fim de menuFuncionarios
 
     /**

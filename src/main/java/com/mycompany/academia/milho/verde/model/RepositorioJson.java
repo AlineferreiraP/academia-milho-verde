@@ -2,6 +2,10 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
+/*
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
+ */
 package com.mycompany.academia.milho.verde.model; // pacote do Model (usa os métodos de pacote das gestões)
 
 import com.mycompany.academia.milho.verde.dao.DaoException; // erro de arquivo
@@ -409,6 +413,7 @@ public class RepositorioJson { // salva e carrega no academia.json tudo o que n�
         json.put("nome", produto.getNome()); // nome
         json.put("preco", produto.getPreco()); // preço
         json.put("quantidade", produto.getQuantidade()); // quantidade em estoque
+        json.put("setor", produto.getSetor()); // LOJA ou LANCHONETE
         return json; // objeto pronto
     } // fim de produtoParaJson
 
@@ -419,8 +424,9 @@ public class RepositorioJson { // salva e carrega no academia.json tudo o que n�
      * @return o produto recriado
      */
     private Produto jsonParaProduto(JSONObject json) { // JSON vira Produto
+        String setor = json.has("setor") ? json.getString("setor") : Produto.LOJA; // arquivo antigo sem setor: é da lojinha
         return new Produto(json.getInt("id"), json.getString("nome"),
-                json.getDouble("preco"), json.getInt("quantidade")); // o construtor valida
+                json.getDouble("preco"), json.getInt("quantidade"), setor); // o construtor valida
     } // fim de jsonParaProduto
 
     /**

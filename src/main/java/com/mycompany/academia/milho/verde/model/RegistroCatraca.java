@@ -11,6 +11,8 @@ import java.time.LocalDateTime; // data e hora
  *
  * <p>Depois de criado o registro não muda: todos os atributos são {@code final},
  * pois o histórico de acessos não deve ser reescrito.</p>
+ *
+ * @author Aline Ferreira
  */
 public class RegistroCatraca implements Identificavel { // uma passagem pela catraca (entrada ou saída)
 

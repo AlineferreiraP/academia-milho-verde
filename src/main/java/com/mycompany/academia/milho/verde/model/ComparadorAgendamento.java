@@ -12,6 +12,8 @@ import java.util.Comparator; // interface do Java para comparar dois objetos
  *
  * <p>O resultado de {@code compare(a, b)} é negativo se {@code a} começa antes,
  * zero se os dois começam no mesmo dia e hora, e positivo se {@code a} começa depois.</p>
+ *
+ * @author Aline Ferreira
  */
 public class ComparadorAgendamento implements Comparator<Agendamento> { // compara dois agendamentos pelo dia e hora da primeira aula
 

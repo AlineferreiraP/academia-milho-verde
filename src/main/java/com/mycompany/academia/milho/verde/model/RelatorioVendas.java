@@ -15,6 +15,8 @@ import java.util.List; // tipo da lista
  * <p>A lista guarda objetos {@link Venda}. Na hora de somar, cada venda
  * calcula o seu próprio total (polimorfismo), então o relatório não precisa
  * saber de qual tipo é cada uma.</p>
+ *
+ * @author Aline Ferreira
  */
 public class RelatorioVendas { // relatório das vendas de um período
 
